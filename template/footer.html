@@ -1,0 +1,31 @@
+<footer class="page-footer user_color">
+    <div class="container">
+        <div class="row">
+            <div class="col l6 s12">
+                <h5 class="white-text">{{ orga_name }}</h5>
+                <ul>
+                    <li>{{ orga_address }},</li>
+                    <li>{{ orga_city }}, {{ orga_state }} {{ orga_zipcode }}, {{ orga_country }}</li>
+                </ul>
+            </div>
+            <div class="col l4 offset-l2 s12">
+                <!--<h5 class="white-text"></h5>-->
+                <ul>
+                    <li>Site Web: <a class="grey-text text-lighten-3" href="{{ orga_website }}">{{ orga_website }}</a></li>
+                </ul>
+                <ul>
+                    <li>Email: <a class="grey-text text-lighten-3" href="mailto{{ orga_email }}">{{ orga_email }}</a></li>
+                </ul>
+                <ul>
+                    <li>Phone: {{ orga_phone }}</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="footer-copyright">
+        <div class="container">
+            © 2019 Copyright Kiwiversity - Events 
+            <a class="grey-text text-lighten-4 right" href="www.kiwiversity.com">www.kiwiversity.com</a>
+        </div>
+    </div>
+</footer>

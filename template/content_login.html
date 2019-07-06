@@ -1,0 +1,36 @@
+<div class="container valign-wrapper"> 
+    <div class="row">
+        <form class="col s12 login_form" method="post" action="{{ path }}/checklogin{{ may_be_event_id }}">
+            <div class="col s12 main_color_dark_txt">
+                <i class="large material-icons prefix">person</i>
+            </div>
+            <div class="input-field col l6 offset-l3 m8 offset-m2 s10 offset-s1">
+                <input placeholder="Enter your username or email" id="user_name" type="text" class="validate" name="user_name" required>
+                <label for="user_name">Username</label>
+            </div>
+            <div class="input-field col l6 offset-l3 m8 offset-m2 s10 offset-s1">
+                <input placeholder="Enter your password" id="password" type="password" class="validate" name="password" required>
+                <label for="password">Password</label>
+            </div>
+            <div class="col l6 offset-l3 m8 offset-m2 s10 offset-s1 right">
+                <label>
+                    <a class='pink-text' href='mailto:merialdo.gaelle@gmail.com'><b>Forgot Password?</b></a>
+                </label>
+            </div>
+            <div class="col s12">
+                <button class="btn waves-effect waves-light main_color" type="submit" name="submit">
+                    Log In<i class="material-icons right">send</i>
+                </button>
+            </div>
+        </form>
+        <div class="col s12">
+            <a class="waves-effect waves-light" href="{{ path }}/signin{{ may_be_event_id }}">Create Account</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    if (window.localStorage.getItem('user_name')) {
+        document.getElementById("user_name").value = window.localStorage.getItem('user_name');
+    }
+</script>

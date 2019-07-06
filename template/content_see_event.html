@@ -1,0 +1,28 @@
+<div class="container valign-wrapper"> 
+    <div class="row one_event">
+        <div class="col s12 m8 l8 main_color_light" id="info_event">
+            <h3 class="main_color_dark_txt"><strong>{{ name }}</strong></h3>
+            <h6>{{ start_weekday }} {{ start_date }} at {{ location_name }}</h6> 
+            <h6>{{ public_txt }}</h6>
+        </div>
+        <div class="col s12 m4 l4 main_color_dark" id="img_event">
+            <img src="{{ path }}/{{ image_src }}" alt="{{ image_alt }}">
+        </div>
+        <div class="col s12 main_color_light bottom_line">
+            {{ book_tickets }}
+        </div>
+        <div class="col s12 m8 l8">
+            <h5 class="main_color_dark_txt">Description</h5>
+            <p>{{ description }}</p>
+        </div>
+        <div class="col s12 m4 l4 align_left">
+            <h5 class="main_color_dark_txt">Date & Time</h5>
+            <p>Start: {{ start_weekday }} {{ start_date }} at {{ start_time }}
+            <br/>End: {{ finish_weekday }} {{ finish_date }} at {{ finish_time }}</p>            
+            <h5 class="main_color_dark_txt">Location</h5>
+            <p>{{ location_name }}<br/>{{ location_whole_address1 }}<br/>{{ location_whole_address2 }}</p>
+            <h5 class="main_color_dark_txt">Price</h5>
+            <p>{{ prices }}</p>
+        </div>
+    </div>
+</div>

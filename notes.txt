@@ -1,0 +1,46 @@
+
+--INFOS----------------------------------------------------------------------------------------------
+
+{{ path }}/events/logged -> logged visitor or admin in user mode
+{{ path }}/events/admin -> admin mode
+-www.kiwiversity.com/nomAF/events/ ...
+
+
+--TO DO POUR SOUTENANCE:--------------------------------------------------------------------------------------
+
+-mettre les errors partout et tester   header('Location: ../display_error/admin') côté admin et   header('Location: display_error'); côté normal
+
+-mettre à jour les diagrammes de classe
+-mettre à jour les relations (foreign keys) dans les tables de la base de données
+-codacy
+
+
+
+--ETAPES FUTURES:------------------------------------------------------------------------------------
+
+V2 fin juillet: VOIR AVEC JMARC LES PRIORITES
+
+-possibilité pour l'admin d'ajouter des accounts
+-possibilité pour l'admin d'ajouter des tickets
+-account settings: changer son mdp (générer un n° unique, le stocker dans la bdd en ajoutant un field ds la table accounts "token", envoi email avec oken et lien genre ../recuperation/token, au lien: découper le token et checker la durée de validité, si ok afficher une page pour entrer le nouveau mdp)
+-receive a notification (or display on dashboard??) when new account or new tickets (ajouter cham viewed =0 qui devient 1 quand validé??)
+-add online payment (Stripe?)
+-documentation pour tout tout tout
+
+-rajouter manage_images et possibilité d'uploader une image quand create new event
+-gestion des catégories ?? pouvoir chercher des events par catégorie
+-rajouter time limit for booking ?
+-pour les events: add refund policy / add "add to calendar" // add facebook link and other socialnetworks
+
+
+
+
+V3 futur:
+-rajouter manage_locations et possibilité d'uploader une image quand create new event
+-Model: sauvegarder dans le fichier de log toutes les modifications de la bdd
+-lier au système Kiwiversity et aux tables de Persons
+
+-rajouter une class Orga qui controlle l'Organisation concernée et peut faire appel au Model pour récupérer par ex le logo, etc. ???
+-du coup: pour la page, il faut créer une instance de la classe Orga pour récupérer le logo et autres infos ???
+-plus tard: autres langues!!!! et du coup autres currency!! (ou alors dépend de orga?)
+

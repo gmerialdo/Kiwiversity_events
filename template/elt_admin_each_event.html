@@ -1,0 +1,24 @@
+<div class="col s10 offset-s1" id="event{{ event_id }}">
+    <div class="admin_each_event">
+        <div class="col s10 offset-s1 l1 tiny_img">
+            <img src="{{ path }}/{{ image_src }}" alt="{{ image_alt }}">        
+        </div>
+        <div class="col s10 offset-s1 l7 admin_each_event_text">
+            <strong>Event name: {{ name }}, </strong>Location: {{ location_name }}, Public: {{ public_txt }}     
+            <br/>Start: {{ start_weekday }} {{ start_date }} at {{ start_time }}, End: {{ finish_weekday }} {{ finish_date }} at {{ finish_time }}
+            <br/>Prices: {{ prices_inline }}  
+        </div>
+        <div class="col l2 s10 offset-s1 admin_each_event_text">
+            <span class="red-text">
+                {{ enabled }}
+                <br/><a href="{{ path }}/admin/see_tickets/{{ event_id }}">See tickets</a>
+
+            </span> 
+        </div> 
+        <div class="col l2 s10 offset-s1 admin_each_event_text">
+            {{ modify }}   
+            <a href="{{ path }}/admin/duplicate_event/{{ event_id }}">Duplicate</a>    
+            {{ delete }}      
+        </div>
+    </div>
+</div>

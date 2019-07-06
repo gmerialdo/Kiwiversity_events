@@ -1,0 +1,9 @@
+<div class="col s10 offset-s1 l2 average_img each_image" id="image{{ image_id }}">
+    <img src="{{ path }}/{{ image_src }}" alt="{{ image_alt }}">    
+    <br/><strong>Name: {{ image_alt }}</strong>   
+    <br/><form id="form_image_{{ image_id }}" method="post" action="{{ path }}/admin/rename_image/{{ image_id }}">
+    <button type="button" id="{{ image_id }}" class="btn_change_img main_color" onclick="submit_new_name(this)">Change name</button>
+    <input id="new_name_{{ image_id }}" type="hidden" name="new_image_name"/>
+    </form> 
+    <a href="{{ path }}/admin/delete_image/{{ image_id }}" onclick="return confirm('Image : {{ image_alt }}. Are you sure you want to delete this image?');">Delete image</a> 
+</div>

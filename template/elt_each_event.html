@@ -1,0 +1,11 @@
+<div class="col s12 m6 l4 " id="event{{ event_id }}">
+    <div class="each_event">
+        <a href="{{ path }}/see_event/{{ event_id }}" class="main_color_txt">
+            <img src="{{ path }}/{{ image_src }}" alt="{{ image_alt }}">
+            <p class="red-text"><em>{{ start_weekday }} {{ start_date }} - {{ start_time }}</em></p> 
+            <h5 class="main_color_dark_txt">{{ name }}</h5>
+            <p>{{ location_name }}, {{ location_city }}</p>
+            <p>{{ public_txt }} - {{ price }}</p>
+        </a>    
+    </div>
+</div>

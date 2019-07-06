@@ -1,0 +1,32 @@
+<script>
+    function setSelectedIndex(s, i){
+        s.options[i].selected = true;
+        return;
+    }
+</script>
+
+<div class="container valign-wrapper"> 
+    <div class="row">
+        <form class="col s12 booking_form" method="post" action="{{ path }}/{{ action }}">
+            <div class="col s12 main_color_dark_txt">
+                <i class="large material-icons prefix">event</i>
+            </div>
+            <div class="col l8 offset-l2 m8 offset-m2 s10 offset-s1">
+                <h4>{{ event_name }} - {{ title }}:</h4>
+            </div>
+            <div class="col l8 offset-l2 m8 offset-m2 s10 offset-s1 container">           
+                <div class="row">
+                    {{ tickets_choice }}  
+                </div>
+            </div>
+            <input type="hidden" name="event_id" value="{{ event_id }}"/>
+            <input type="hidden" name="nb_available_tickets" value="{{ nb_available_tickets }}"/>
+            <input type="hidden" name="total_paid" value="{{ total_paid }}"/>
+            <div class="col s12">
+                <button class="btn waves-effect waves-light main_color" type="submit" name="submit">
+                    {{ btn_action }}<i class="material-icons right">send</i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

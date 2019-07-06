@@ -1,0 +1,19 @@
+<div class="row center-align">
+    <div class="center-align">
+        <h2>Manage Locations</h2><br/>
+    </div>
+    <div class="col s6 offset-s3 m4 offset-m4 l2 offset-l5 main_color_txt">
+        <a href="{{ path }}/admin/create_location" class="main_color_txt">
+            <div class="valign-wrapper">
+                <i class="medium material-icons prefix">add_box</i>
+                <strong>Add location</strong>
+            </div>
+        </a>
+    </div>
+</div>
+<br/>
+<div class="row">
+    <div class="col s10 offset-s1 admin_locations">
+        {{ active_locations }}
+    </div>
+</div>

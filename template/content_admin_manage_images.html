@@ -1,0 +1,37 @@
+<div class="row center-align">
+    <div class="center-align">
+        <h2>Manage Images</h2><br/>
+    </div>
+    <div class="col s6 offset-s3 m4 offset-m4 l2 offset-l5 main_color_txt">
+        <a href="{{ path }}/admin/create_image" class="main_color_txt">
+            <div class="valign-wrapper">
+                <i class="medium material-icons prefix">add_box</i>
+                <strong>Add image</strong>
+            </div>
+        </a>
+    </div>
+</div>
+<br/>
+<div class="row">
+    <div class="col s12 admin_images">
+        {{ active_images }}
+    </div>
+</div>
+
+<script>
+    function submit_new_name(form_element){
+        var id = form_element.id;
+        var input_id = "new_name_" + id;
+        var form_id = "form_image_" + id;
+        console.log("input_id"+input_id+"form_id"+form_id);
+        var new_name = prompt('Enter new name:');
+        if (new_name == null || new_name == ""){
+            return false;
+        }
+        else {
+            document.getElementById(input_id).value = new_name;
+            console.log(new_name);
+            return document.getElementById(form_id).submit();
+        }
+    }
+</script>

@@ -1,0 +1,21 @@
+<div class="col s10 offset-s1" id="ticket{{ ticket_id }}">
+    <div class="admin_each_ticket">
+        <div class="col s10 offset-s1 l2">
+            <strong>{{ first_name }} {{ last_name }}</strong>
+        </div> 
+        <div class="col s10 offset-s1 l3">
+            {{ tickets }}
+        </div> 
+        <div class="col s10 offset-s1 l1">
+            {{ total }}
+        </div>
+        <div class="col s10 offset-s1 l2">
+            {{ status }}
+        </div>
+        <div class="col s10 offset-s1 l4">
+            <a href="{{ path }}/admin/modify_tickets/{{ ticket_id }}">Modify tickets</a> /   
+            <a href="{{ path }}/admin/modify_payment/{{ ticket_id }}">Modify payment</a> / 
+            <a href="{{ path }}/admin/cancel_tickets/{{ ticket_id }}" onclick="return confirm('Are you sure you want to cancel these tickets?');">Cancel tickets</a> 
+        </div>
+    </div>
+</div>

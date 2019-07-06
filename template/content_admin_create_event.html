@@ -1,0 +1,259 @@
+<div class="row">
+    <div class="center-align">
+        <h2>{{ title }}</h2>
+    </div>
+    <div class="col s12 m10 offset-m1 l8 offset-l2 new_event">
+        <form class="col s12 create_event_form" method="post" action="{{ path }}/admin/{{ action }}">
+            <div class="col s12 main_color_dark_txt">
+                <i class="large material-icons prefix">add_box</i>
+            </div>
+            
+            <div class="input-field col s12 m10 offset-m1 l8 offset-l2">
+                <input placeholder="Event name" id="name" type="text" class="validate" name="name" value="{{ name }}" required>
+                <label for="name">Event name</label>
+            </div>
+            
+            <div class="input-field col s12 m10 offset-m1 l8 offset-l2">
+                <textarea placeholder="Event description" id="description" class="materialize-textarea" name="description" rows="8" required>{{ description }}</textarea>
+                <label for="description">Description</label>
+            </div>
+            
+            <div class="switch">
+                <label>
+                    Inactive
+                    <input id="active_event" type="checkbox" name="active_event" value="1">
+                    <span class="lever"></span>
+                    Active
+                </label>
+            </div>
+            
+            <div class="input-field col s12 m3 offset-m1 l3 offset-l2">
+                <select id="location_id" name="location_id" required>
+                    <option value="" disabled>Location</option>
+                    {{ location_choices }}
+                </select>
+                <label>Select the location:</label>
+            </div>
+            
+            <div class="input-field col s12 m3 l3">
+                <select class="icons" id="image_id" name="image_id" required>
+                    <option value="0" disabled>Image</option>
+                    {{ image_choices }}
+                </select>
+                <label>Select the image:</label>
+            </div>
+            
+            <div class="input-field col s12 m4 l2">
+                <input placeholder="Category" id="category" type="text" class="validate" name="category" value="{{ category }}">
+                <label for="category">Category:</label>
+            </div>
+            
+            <div class="input-field col s12 m5 offset-m1 l2 offset-l2">
+                <input type="text" id ="start_date" placeholder="Event starts on:" class="datepicker" value="{{ start_date_format }}" name="start_date" required><em class="tiny_text">(YYYY-MM-DD)</em>
+                <label for="category">Starting date:</label>
+            </div>
+            
+            <div class="input-field col s12 m5 l2">
+                <input type="text" class="timepicker" id ="start_time" placeholder="Starting time:" class="datepicker" value="{{ start_time }}" name="start_time" required><em class="tiny_text">(hh:mm)</em>
+                <label for="category">Starting time:</label>
+
+            </div>
+            
+            <div class="input-field col s12 m5 offset-m1 l2">
+                <input type="text" id ="finish_date" placeholder="Event ends on:" class="datepicker" value="{{ finish_date_format }}" name="finish_date" required><em class="tiny_text">(YYYY-MM-DD)</em>
+                <label for="category">Ending date:</label>
+            </div>
+            
+            <div class="input-field col s12 m5 l2">
+                <input type="text" class="timepicker" id ="finish_time" placeholder="Ending time:" class="datepicker" value="{{ finish_time }}" name="finish_time" required><em class="tiny_text">(hh:mm)</em>
+                <label for="category">Ending time:</label>
+            </div>
+            <div class="col s12 create_evt_error_msg red-text">{{ create_evt_error_msg }}</div>
+            
+            <div class="input-field col s12 m5 offset-m1 l4 offset-l2">
+                <select id="type_tickets" name="type_tickets" required>
+                    <option value="0">No tickets needed</option>
+                    <option value="1">Free tickets</option>
+                    <option value="2">Paid tickets</option>
+                    <option value="3">Free tickets but donation welcome</option>
+                </select>
+            <label>Select the type of tickets for this event:</label>
+            </div>
+            
+            <div class="input-field col s12 m5 l4">
+                <select id="public" name="public" required>
+                    <option value="" disabled>Public</option>
+                    <option value="1">All public</option>
+                    <option value="2">Adults only</option>
+                    <option value="3">Children only</option>
+                </select>
+                <label>Select the public for this event:</label>
+                <p>
+                    <label>
+                        <input type="checkbox" name="members_only" id="members_only" value="1"/>
+                        <span>Members only</span>
+                    </label>
+                </p>  
+            </div>
+            
+            <div class="switch col s12 m8 offset-m2 l8 offset-l2">
+                <label>
+                    Disable booking
+                    <input type="checkbox" name="enable_booking" id="enable_booking" value="1">
+                    <span class="lever"></span>
+                    Enable booking
+                </label>
+            </div>
+            
+            <div class="col s12 m8 offset-m2 l8 offset-l2">
+                <div id="div_max_tickets" class="col s12 div_remove">
+                    Maximum number of tickets: 
+                    <div class="input-field inline">
+                        <input id="max_tickets" name="max_tickets" value="{{ max_tickets }}" type="number" min="0" max="10000" step="1" class="validate">
+                        <label for="max_tickets">Max nb</label>
+                    </div>
+                </div>
+                <div id="div_price_adult_mb" class="col s12 div_remove div_price_remove">
+                    Price per adult (member): $
+                    <div class="input-field inline">
+                        <input id="price_adult_mb" name="price_adult_mb" value="{{ price_adult_mb }}" type="number" min="0" max="10000" step="0.01" class="validate">
+                        <label for="price_adult_mb">Price</label>
+                    </div>
+                </div>            
+                <div id="div_price_adult" class="col s12 div_remove div_price_remove">
+                    Price per adult: $
+                    <div class="input-field inline">
+                        <input id="price_adult" name="price_adult" value="{{ price_adult }}" type="number" min="0" max="10000" step="0.01" class="validate">
+                        <label for="price_adult">Price</label>
+                    </div>
+                </div>
+                <div id="div_price_child_mb" class="col s12 div_remove div_price_remove">
+                    Price per child (member): $
+                    <div class="input-field inline">
+                        <input id="price_child_mb" name="price_child_mb" value="{{ price_child_mb }}" type="number" min="0" max="10000" step="0.01" class="validate">
+                        <label for="price_child_mb">Price</label>
+                    </div>
+                </div>            
+                <div id="div_price_child" class="col s12 div_remove div_price_remove">
+                    Price per child: $
+                    <div class="input-field inline">
+                        <input id="price_child" name="price_child" value="{{ price_child }}" type="number" min="0" max="10000" step="0.01" class="validate">
+                        <label for="price_child">Price</label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col s12">
+                <br/>
+                <button id="submit_create_evt" class="btn waves-effect waves-light main_color" type="submit" name="submit">
+                    {{ button }}<i class="material-icons right">send</i>
+                </button>
+            </div>
+     
+        </form>  
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var today = new Date();
+        var elemsDatepicker = document.querySelectorAll(".datepicker");
+        var instance1Datepicker = M.Datepicker.init(elemsDatepicker[1], {autoClose: true, minDate: today, firstDay: 1, format: "yyyy-mm-dd"});
+        var instance0Datepicker = M.Datepicker.init(elemsDatepicker[0], {autoClose: true, minDate: today, firstDay: 1, format: "yyyy-mm-dd", onSelect: function(d){
+            var instance1Datepicker = M.Datepicker.init(elemsDatepicker[1], {autoClose: true, minDate: d, firstDay: 1, format: "yyyy-mm-dd"})
+        }});
+        var elemsTimepicker = document.querySelectorAll(".timepicker");
+        var instancesTimepicker = M.Timepicker.init(elemsTimepicker, {autoClose: true, defaultTime: "12:00"});
+    });
+    function setSelectedIndex(s, i){
+        s.options[i].selected = true;
+        return;
+    }
+    document.getElementById("active_event").checked = {{ active_event }};
+//    setSelectedIndex(document.getElementById("location_id"), {{ location_id }});
+//    setSelectedIndex(document.getElementById("image_id"), {{ image_id }});
+    setSelectedIndex(document.getElementById("type_tickets"), {{ type_tickets }});
+    setSelectedIndex(document.getElementById("public"), {{ public }});
+    document.getElementById("members_only").checked = {{ members_only }};
+    document.getElementById("enable_booking").checked = {{ enable_booking }};
+    
+    var select_loc = document.getElementById("location_id");
+    var option;
+    for (var i=0; i<select_loc.options.length; i++) {
+        option = select_loc.options[i];
+        if (option.value == "{{ location_id }}") {
+            option.setAttribute('selected', true);
+        } 
+    }
+    var select_img = document.getElementById("image_id");
+    for (var i=0; i<select_img.options.length; i++) {
+        option = select_img.options[i];
+        if (option.value == "{{ image_id }}") {
+            option.setAttribute('selected', true);
+        } 
+    }
+    
+    setFormElts();
+    document.getElementById('type_tickets').addEventListener('change', setFormElts);
+    document.getElementById('public').addEventListener('change', setFormElts); 
+    document.getElementById('members_only').addEventListener('change', setFormElts);     
+    
+    function setFormElts(){
+        if (document.getElementById('type_tickets').value == 0){
+            var elts = document.getElementsByClassName('div_remove');
+            for (var i=0; i<elts.length; i++){
+                elts[i].style.display = "none";
+            }
+        }
+        if (document.getElementById('type_tickets').value == 1 || document.getElementById('type_tickets').value == 3){
+            document.getElementById('div_max_tickets').style.display = "initial";
+            var elts2 = document.getElementsByClassName('div_price_remove');
+            for (var i=0; i<elts2.length; i++){
+                elts2[i].style.display = "none";
+            }
+        }
+        if (document.getElementById('type_tickets').value == 2){
+            document.getElementById('div_max_tickets').style.display = "initial";
+            if (document.getElementById('members_only').checked){
+                if (document.getElementById('public').value == 1){
+                    document.getElementById('div_price_adult_mb').style.display = "initial";
+                    document.getElementById('div_price_adult').style.display = "none";
+                    document.getElementById('div_price_child_mb').style.display = "initial";
+                    document.getElementById('div_price_child').style.display = "none";        
+                }
+                else if(document.getElementById('public').value == 2){
+                    document.getElementById('div_price_adult_mb').style.display = "initial";
+                    document.getElementById('div_price_adult').style.display = "none";
+                    document.getElementById('div_price_child_mb').style.display = "none";
+                    document.getElementById('div_price_child').style.display = "none";   
+                }
+                else if (document.getElementById('public').value == 3){
+                    document.getElementById('div_price_adult_mb').style.display = "none";
+                    document.getElementById('div_price_adult').style.display = "none";
+                    document.getElementById('div_price_child_mb').style.display = "initial";
+                    document.getElementById('div_price_child').style.display = "none";       
+                }
+            }
+            else {
+                if (document.getElementById('public').value == 1){
+                    document.getElementById('div_price_adult_mb').style.display = "initial";
+                    document.getElementById('div_price_adult').style.display = "initial";
+                    document.getElementById('div_price_child_mb').style.display = "initial";
+                    document.getElementById('div_price_child').style.display = "initial";        
+                }
+                else if(document.getElementById('public').value == 2){
+                    document.getElementById('div_price_adult_mb').style.display = "initial";
+                    document.getElementById('div_price_adult').style.display = "initial";
+                    document.getElementById('div_price_child_mb').style.display = "none";
+                    document.getElementById('div_price_child').style.display = "none";   
+                }
+                else if (document.getElementById('public').value == 3){
+                    document.getElementById('div_price_adult_mb').style.display = "none";
+                    document.getElementById('div_price_adult').style.display = "none";
+                    document.getElementById('div_price_child_mb').style.display = "initial";
+                    document.getElementById('div_price_child').style.display = "initial";       
+                }
+            }
+        }
+    }
+</script>

@@ -1,0 +1,45 @@
+<div class="container valign-wrapper"> 
+    <div class="row">
+        <form class="col s12 signin_form" method="post" action="{{ path }}/create_account{{ may_be_event_id }}">
+            <div class="col s12 main_color_dark_txt">
+                <i class="large material-icons prefix">person_add</i>
+                <h3>Create a new account</h3>
+            </div>
+            <div class="input-field col l6 offset-l3 m8 offset-m2 s10 offset-s1">
+                <i class="material-icons prefix">email</i>
+                <input placeholder="Enter your email" id="new_email" type="email" class="validate" name="new_email" required>
+                <label for="new_email">Email</label>
+            </div>
+            <div class="input-field col l3 offset-l3 m4 offset-m2 s10 offset-s1">
+                <input placeholder="Enter your first name" id="new_first_name" type="text" class="validate" name="new_first_name" required>
+                <label for="new_first_name">First Name</label>
+            </div>
+            <div class="input-field col l3 m4 s10 offset-s1">
+                <input placeholder="Enter your last name" id="new_last_name" type="text" class="validate" name="new_last_name" required>
+                <label for="new_last_name">Last Name</label>
+            </div>
+            <div class="input-field col l4 offset-l4 m6 offset-m3 s10 offset-s1">
+                <input placeholder="Choose your password" id="new_password" type="password" class="validate" name="new_password" minlength="6" maxlength="20" oninput="setInterval(checkSecurityPW, 250)" required>
+                <label for="new_password">Password</label>
+                <div id="level_mdp" style="float:right;"></div>
+            </div>
+            <div class="input-field col l4 offset-l4 m6 offset-m3 s10 offset-s1">
+                <input placeholder="Confirm your password" id="new_password_check" type="password" oninput="verifyPw(this)" class="validate" name="new_password_check" required>
+                <label for="new_password_check">Confirm Password</label>
+                <div id="no_match" class="red-text" style="float:right;"></div>
+            </div>
+            <div class="col s12">
+                <button class="btn waves-effect waves-light main_color" type="submit" name="submit">
+                    Sign In<i class="material-icons right">send</i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<script>
+    if (window.localStorage.getItem('user_name')) {
+        document.getElementById("user_name").value = window.localStorage.getItem('user_name');
+    }
+</script>

@@ -1,0 +1,12 @@
+<div class="col s10 offset-s1 m5 offset-m1 l4 average_img each_location left-align" id="location{{ location_id }}">
+    <br/><strong>Name: {{ location_name }}</strong>   
+    <br/><strong>Address:</strong> {{ location_whole_address1 }}
+    <br/>{{ location_whole_address2 }}
+    <br/><strong>Phone:</strong> {{ location_phone }}
+    <br/><strong>Max occupancy:</strong> {{ max_occupancy }}
+    <br/><a href="{{ path }}/admin/modify_location/{{ location_id }}">Modify location</a> 
+    <br/><a href="{{ path }}/admin/delete_location/{{ location_id }}" onclick="return confirm('Location : {{ location_name }}. Are you sure you want to delete this location?');">Delete location</a> 
+</div>
+
+
+                  

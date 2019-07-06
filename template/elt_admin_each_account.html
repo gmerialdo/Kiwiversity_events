@@ -1,0 +1,20 @@
+<div class="col s10 offset-s1" id="account{{ evt_account_id }}">
+    <div class="admin_each_account">
+        <div class="col s10 offset-s1 l1 tiny_img">
+            <strong>- {{ evt_account_id }} -</strong>       
+        </div>
+        <div class="col s10 offset-s1 l3">
+            <strong>{{ first_name }} {{ last_name }}</strong>
+        </div> 
+        <div class="col s10 offset-s1 l3">
+            username: {{ user_name }}
+        </div> 
+        <div class="col s10 offset-s1 l1 red-text">
+            {{ status }}
+        </div>
+        <div class="col s10 offset-s1 l4">
+            {{ btn_admin_rights }}    
+            {{ btn_activate }}  
+        </div>
+    </div>
+</div>

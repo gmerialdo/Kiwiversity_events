@@ -1,0 +1,24 @@
+<div class="col s10 offset-s1" id="event{{ event_id }}">
+    <div class="admin_each_event">
+        <div class="col s10 offset-s1 l2 tiny_img">
+            {{ start_weekday }} {{ start_date }}     
+        </div>
+        <div class="col s10 offset-s1 l3 admin_each_event_text">
+            <strong>{{ name }}</strong>
+        </div>
+        <div class="col s10 offset-s1 l1 admin_each_event_text">
+            <span class="red-text">
+                {{ enabled }}
+            </span> 
+        </div> 
+        <div class="col s10 offset-s1 l2 admin_each_event_text">
+                {{ tickets }}
+        </div>
+        <div class="col s10 offset-s1 l3 admin_each_event_text">
+            <em>Maximum tickets: {{ max_tickets }} <br/>Available tickets: {{ available_tickets }}</em>
+        </div>
+        <div class="col s10 offset-s1 l1 admin_each_event_text">
+            <a href="{{ path }}/admin/see_tickets/{{ event_id }}">See tickets</a>
+        </div>
+    </div>
+</div>

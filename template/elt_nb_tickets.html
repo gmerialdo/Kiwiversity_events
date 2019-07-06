@@ -1,0 +1,21 @@
+<div class="input-field col l5 offset-l3 m6 offset-m2 s8 offset-s1">
+    <select name="{{ name_ticket }}" id="{{ name_ticket }}">
+        <option value="0" selected>0</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+    </select>
+    <label>Number of tickets: {{ type_ticket }}</label>
+</div>
+    
+<div class="input-field col l4 m4 s3">      
+    Price: {{ dollar_sign }}{{ price_ticket }}
+</div>
+
+<input type="hidden" name="{{ price_booked }}" value="{{ price_ticket }}"/>
+
+<script>
+    setSelectedIndex(document.getElementById("{{ name_ticket }}"), {{ {{ name_ticket }} }});
+</script>

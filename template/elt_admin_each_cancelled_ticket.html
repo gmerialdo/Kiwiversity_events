@@ -1,0 +1,20 @@
+<div class="col s10 offset-s1" id="ticket{{ ticket_id }}">
+    <div class="admin_each_ticket">
+        <div class="col s10 offset-s1 l2">
+            <strong>Event: {{ event_name }}</strong>
+        </div>
+        <div class="col s10 offset-s1 l2">
+            {{ first_name }} {{ last_name }}
+        </div> 
+        <div class="col s10 offset-s1 l3">
+            {{ tickets }}
+        </div> 
+        <div class="col s10 offset-s1 l2">
+            {{ cancelled }}
+        </div>
+        <div class="col s10 offset-s1 l2">
+            {{ status_cancelled }}
+        </div>
+        {{ cancel_btn }}
+    </div>
+</div>
