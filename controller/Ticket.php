@@ -93,8 +93,8 @@ class Ticket
             $tickets .= "Tickets : ".$this->_nb_tickets_all."<br/>";
             if ($this->_donation != 0){
                 $total .= "Willing to donate: $".$this->_donation;
-                if ($this->_payment_datetime != null){$payment_date = Date("Y-m-d", strtotime($this->_payment_datetime)); $status = "Paid $".$this->_total_paid."<br/>on ".$payment_date; $status_cancelled = $status;}
-                else {$status = "Not paid yet"; $status_cancelled = "No payment";}
+                if ($this->_payment_datetime != null){$payment_date = Date("Y-m-d", strtotime($this->_payment_datetime)); $status = "/ Paid $".$this->_total_paid."<br/>on ".$payment_date; $status_cancelled = $status;}
+                else {$status = "/ Not paid yet"; $status_cancelled = "No payment";}
             }
             else {
                 $total .= "Free";
@@ -114,8 +114,8 @@ class Ticket
                 $tickets .= "Tickets - child : ".$this->_nb_tickets_child." - Price: $".$this->_price_child_booked."<br/>";
             }
             $total = "Total: $".$this->_total_to_pay;
-            if ($this->_payment_datetime != null){$payment_date = Date("Y-m-d", strtotime($this->_payment_datetime)); $status = "Paid $".$this->_total_paid."<br/>on ".$payment_date; $status_cancelled = $status;}
-            else {$status = "Not paid yet"; $status_cancelled = "No payment";}
+            if ($this->_payment_datetime != null){$payment_date = Date("Y-m-d", strtotime($this->_payment_datetime)); $status = "/ Paid $".$this->_total_paid."<br/>on ".$payment_date; $status_cancelled = $status;}
+            else {$status = "/ Not paid yet"; $status_cancelled = "No payment";}
         }
         return [
             "{{ ticket_id }}" => $this->_ticket_id,
@@ -167,16 +167,21 @@ class Ticket
     }
 
     public function createTicket($args){
-        if (empty($args["nb_tickets_adult_mb"])) $args["nb_tickets_adult_mb"] = NULL;
-        if (empty($args["nb_tickets_adult"])) $args["nb_tickets_adult"] = NULL;
-        if (empty($args["nb_tickets_child_mb"])) $args["nb_tickets_child_mb"] = NULL;
-        if (empty($args["nb_tickets_child"])) $args["nb_tickets_child"] = NULL;
-        if (empty($args["nb_tickets_all"])) $args["nb_tickets_all"] = NULL;
-        if (empty($args["price_adult_mb_booked"])) $args["price_adult_mb_booked"] = NULL;
-        if (empty($args["price_adult_booked"])) $args["price_adult_booked"] = NULL;
-        if (empty($args["price_child_mb_booked"])) $args["price_child_mb_booked"] = NULL;
-        if (empty($args["price_child_booked"])) $args["price_child_booked"] = NULL;
+        $optionnal = ["nb_tickets_adult_mb", "nb_tickets_adult", "nb_tickets_child_mb", "nb_tickets_child", "nb_tickets_all", "price_adult_mb_booked", "price_adult_booked", "price_child_mb_booked", "price_child_booked"];
+        foreach ($optionnal as $key => $value) {
+            if (empty($args[$key])) $args["$key"] = NULL;
+        }
         if (empty($args["donation"])) $args["donation"] = 0;
+        // if (empty($args["nb_tickets_adult_mb"])) $args["nb_tickets_adult_mb"] = NULL;
+        // if (empty($args["nb_tickets_adult"])) $args["nb_tickets_adult"] = NULL;
+        // if (empty($args["nb_tickets_child_mb"])) $args["nb_tickets_child_mb"] = NULL;
+        // if (empty($args["nb_tickets_child"])) $args["nb_tickets_child"] = NULL;
+        // if (empty($args["nb_tickets_all"])) $args["nb_tickets_all"] = NULL;
+        // if (empty($args["price_adult_mb_booked"])) $args["price_adult_mb_booked"] = NULL;
+        // if (empty($args["price_adult_booked"])) $args["price_adult_booked"] = NULL;
+        // if (empty($args["price_child_mb_booked"])) $args["price_child_mb_booked"] = NULL;
+        // if (empty($args["price_child_booked"])) $args["price_child_booked"] = NULL;
+        // if (empty($args["donation"])) $args["donation"] = 0;
         foreach ($args as $key => $value){
             $newKey = "_".$key;
             $this->$newKey = $value;
