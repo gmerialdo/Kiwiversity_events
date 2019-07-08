@@ -42,7 +42,7 @@ class Page
             "{{ user_or_admin_style }}" => $user_or_admin_style,
             "{{ navBar }}" => $this->addNavbar(),
             "{{ content }}" => $getPage[1],
-            "{{ footer }}" => file_get_contents("template/footer.html"),
+            "{{ footer }}" => View::makeHtml([], "footer.html"),
             "{{ orga_name }}" => "Alliance Française de Tucson",
             "{{ orga_logo_src }}" => "layout/images/logo_AFTucson.png",
             "{{ orga_website }}" => "www.aftucson.com",
@@ -62,26 +62,26 @@ class Page
         global $session;
         $navbar_account = "";
         $navbar_switch = "";
-        $navbar_link = file_get_contents("template/navbar_user.html");
+        $navbar_link = View::makeHtml([], "navbar_user.html");
         if ($this->_rights == "visitor"){
-            $navbar_accountoption = file_get_contents("template/navbar_accountoption_signin.html");
-            $nav_bar_accountoption_mobile = file_get_contents("template/navbar_accountoption_signin.html");
+            $navbar_accountoption = View::makeHtml([], "navbar_accountoption_signin.html");
+            $nav_bar_accountoption_mobile = View::makeHtml([], "navbar_accountoption_signin.html");
         }
         else {
             $navbar_account = "- ".$session->get('first_name')." ". $session->get('last_name')." -";
             if ($session->get('admin_mode')){
-                $navbar_switch = file_get_contents("template/navbar_switchtouser.html");
-                $navbar_link = file_get_contents("template/navbar_admin.html");
-                $navbar_accountoption = file_get_contents("template/navbar_accountoption_admin.html");
-                $nav_bar_accountoption_mobile = file_get_contents("template/navbar_accountoption_admin_mobile.html");
+                $navbar_switch = View::makeHtml([], "navbar_switchtouser.html");
+                $navbar_link = View::makeHtml([], "navbar_admin.html");
+                $navbar_accountoption = View::makeHtml([], "navbar_accountoption_admin.html");
+                $nav_bar_accountoption_mobile = View::makeHtml([], "navbar_accountoption_admin_mobile.html");
             }
             else {
                  // if user with admin rights
                 if ($this->_rights == "admin"){
-                    $navbar_switch = file_get_contents("template/navbar_switchtoadmin.html");
+                    $navbar_switch = View::makeHtml([], "navbar_switchtoadmin.html");
                 }
-                $navbar_accountoption = file_get_contents("template/navbar_accountoption_logged.html");
-                $nav_bar_accountoption_mobile = file_get_contents("template/navbar_accountoption_logged_mobile.html");
+                $navbar_accountoption = View::makeHtml([], "navbar_accountoption_logged.html");
+                $nav_bar_accountoption_mobile = View::makeHtml([], "navbar_accountoption_logged_mobile.html");
             }
         }
         return view::makeHtml([
@@ -125,9 +125,9 @@ class Page
                 $may_be_event_id = "/".$event_id;
             }
             $content = View::makeHtml(["{{ may_be_event_id }}" => $may_be_event_id], "content_login.html");
-            if ($message == "error") $content.= file_get_contents("template/msg_login_error.html");
-            if ($message == "existing_email") $content.= file_get_contents("template/msg_login_existing_email.html");
-            if ($message == "booking") $content.= file_get_contents("template/msg_login_booking.html");
+            if ($message == "error") $content.= View::makeHtml([], "msg_login_error.html");
+            if ($message == "existing_email") $content.= View::makeHtml([], "msg_login_existing_email.html");
+            if ($message == "booking") $content.= View::makeHtml([], "msg_login_booking.html");
         }
         return ["login", $content];
     }
