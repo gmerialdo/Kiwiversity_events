@@ -822,7 +822,6 @@ class PageAdmin extends Page
         global $safeData;
         if (isset($safeData->_file["new_image_file"])){
             $file = $safeData->_file["new_image_file"];
-            print_r($file);
             //check size
             if ($file["size"] > 2097152){
                 header('Location: create_images/2');
