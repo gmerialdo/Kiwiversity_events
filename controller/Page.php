@@ -65,7 +65,7 @@ class Page
         $navbar_link = View::makeHtml([], "navbar_user.html");
         if ($this->_rights == "visitor"){
             $navbar_accountoption = View::makeHtml([], "navbar_accountoption_signin.html");
-            $nav_bar_accountoption_mobile = View::makeHtml([], "navbar_accountoption_signin.html");
+            $nav_bar_acc_opt_mob = View::makeHtml([], "navbar_accountoption_signin.html");
         }
         else {
             $navbar_account = "- ".$session->get('first_name')." ". $session->get('last_name')." -";
@@ -73,7 +73,7 @@ class Page
                 $navbar_switch = View::makeHtml([], "navbar_switchtouser.html");
                 $navbar_link = View::makeHtml([], "navbar_admin.html");
                 $navbar_accountoption = View::makeHtml([], "navbar_accountoption_admin.html");
-                $nav_bar_accountoption_mobile = View::makeHtml([], "navbar_accountoption_admin_mobile.html");
+                $nav_bar_acc_opt_mob = View::makeHtml([], "navbar_accountoption_admin_mobile.html");
             }
             else {
                  // if user with admin rights
@@ -81,7 +81,7 @@ class Page
                     $navbar_switch = View::makeHtml([], "navbar_switchtoadmin.html");
                 }
                 $navbar_accountoption = View::makeHtml([], "navbar_accountoption_logged.html");
-                $nav_bar_accountoption_mobile = View::makeHtml([], "navbar_accountoption_logged_mobile.html");
+                $nav_bar_acc_opt_mob = View::makeHtml([], "navbar_accountoption_logged_mobile.html");
             }
         }
         return view::makeHtml([
@@ -89,7 +89,7 @@ class Page
             "{{ navbar_switch }}" => $navbar_switch,
             "{{ navbar_link }}" => $navbar_link,
             "{{ navbar_accountoption }}" => $navbar_accountoption,
-            "{{ navbar_accountoption_mobile }}" => $nav_bar_accountoption_mobile
+            "{{ navbar_accountoption_mobile }}" => $nav_bar_acc_opt_mob
         ], "navbar_template.html");
     }
 
