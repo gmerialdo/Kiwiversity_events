@@ -32,7 +32,7 @@ class PageAdmin extends Page
 
     public function create_event(){
         $location_choices = $this->setLocationChoices();
-        $image_choices = $this->setLImageChoices();
+        $image_choices = $this->setImageChoices();
         $content = View::makeHtml([
             "{{ name }}" => "",
             "{{ description }}" => "",
@@ -460,19 +460,21 @@ class PageAdmin extends Page
                 $tickets = "No ticket";
             }
             else {
-                $admin_each_ticket;
+                $each_ticket;
                 foreach ($data["data"] as $row){
-                    $admin_each_ticket = new ticket("read", ["id" => $row["ticket_id"]]);
-                    $args = $admin_each_ticket->getticketData();
-                    $name = new Account("read", ["id" =>  $admin_each_ticket->getVarTicket("_evt_account_id")]);
-                    $args["{{ first_name }}"] = $name->getVarAccount("_first_name");
-                    $args["{{ last_name }}"] = $name->getVarAccount("_last_name");
-                    $tickets .= View::makeHtml($args, "elt_admin_each_ticket.html");
+                    $each_ticket = new ticket("read", ["id" => $row["ticket_id"]]);
+                    $ticket_data = $each_ticket->getticketData();
+                    $account = new Account("read", ["id" =>  $each_ticket->getVarTicket("_evt_account_id")]);
+                    $ticket_data["{{ first_name }}"] = $account->getVarAccount("_first_name");
+                    $ticket_data["{{ last_name }}"] = $account->getVarAccount("_last_name");
+                    $tickets .= View::makeHtml($ticket_data, "elt_admin_each_ticket.html");
                 }
             }
-            $data = $event->getEventData();
-            $data = array_merge($data, ["{{ tickets }}" => $tickets]);
-            $content = View::makeHtml($data, "content_admin_see_tickets.html");
+            $args = $event->getEventData();
+            if ($event->getVarEvent("_max_tickets") !== null){$args["{{ available_tickets }}"] = $event->getVarEvent("_nb_available_tickets");}
+            else {$args["{{ available_tickets }}"] = "illimited"; $args["{{ max_tickets }}"] = "undefined";}
+            $args = array_merge($args, ["{{ tickets }}" => $tickets]);
+            $content = View::makeHtml($args, "content_admin_see_tickets.html");
             return ["See tickets", $content];
         }
     }
@@ -573,7 +575,9 @@ class PageAdmin extends Page
             if (null !== $event->getVarEvent("_nb_available_tickets")){$nb_available_tickets = $event->getVarEvent("_nb_available_tickets");}
             else { $nb_available_tickets = "";}
             $data["{{ event_id }}"] = $event->getVarEvent("_event_id");
-            $data["{{ name }}"] = $event->getVarEvent("_name");
+            $data["{{ event_name }}"] = $event->getVarEvent("_name");
+            global $session;
+            $data["{{ account_choices }}"] = View::makeHtml(["{{ evt_account_id }}" => $session->get("evt_account_id")], "elt_admin_account_no_choice.html");
             $data["{{ tickets_choice }}"] = $tickets_choice;
             $data["{{ action }}"] = "admin/save_modif_tickets/{{ ticket_id }}";
             $data["{{ title }}"] = "Modify those tickets";
@@ -664,7 +668,7 @@ class PageAdmin extends Page
                 $args["{{ first_name }}"] = $name->getVarAccount("_first_name");
                 $args["{{ last_name }}"] = $name->getVarAccount("_last_name");
                 if ($ticket->getVarTicket("_payment_datetime") != null){
-                    $args["{{ cancel_payment_btn }}"] = file_get_contents("template/elt_admin_cancel_payment_btn.html");
+                    $args["{{ cancel_payment_btn }}"] = View::makeHtml([], "elt_admin_cancel_payment_btn.html");
                 }
                 else {$args["{{ cancel_payment_btn }}"] = "";}
                 $args = array_merge($args, $args = $ticket->getTicketData());

@@ -5,7 +5,11 @@
     <div class="center-align">
         <h4>For event: {{ name }}, {{ start_date }}</h4>
     </div>
+    <div class="col s10 offset-s1">
+        <em>Maximum tickets: {{ max_tickets }} <br/>Available tickets: {{ available_tickets }}</em>
+    </div>
     <div class="col s6 offset-s3 m4 offset-m4 l2 offset-l5 main_color_txt">
+        <br/>
         <a href="{{ path }}/admin/book_tickets_for/{{ event_id }}" class="main_color_txt">
             <div class="valign-wrapper">
                 <i class="medium material-icons prefix">add_box</i>
