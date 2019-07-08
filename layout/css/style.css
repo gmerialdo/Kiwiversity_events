@@ -18,7 +18,7 @@
 
 .brand-logo a { max-height: 100vh; }
 
-ul#account_dropdown { top: 64px !important; }
+ul#account_dropdown { top: 64px; }
 
 /* ----------------------page content---------------------- */
 
@@ -78,7 +78,7 @@ em.tiny_text {
 }
 
 .btn_change_img {
-    background: none !important;
+    background: none;
     border: none;
     color: #039be5;
     cursor: pointer;
@@ -112,7 +112,7 @@ div.each_event {
 }
 
 .row_event > .col {
-  margin-left: 0 !important;
+  margin-left: 0;
 }
 
 /* ----login page----- */
