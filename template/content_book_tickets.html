@@ -11,11 +11,13 @@
             <div class="col s12 main_color_dark_txt">
                 <i class="large material-icons prefix">event</i>
             </div>
-            <div class="col l8 offset-l2 m8 offset-m2 s10 offset-s1">
-                <h4>{{ event_name }} - {{ title }}:</h4>
+            <div class="col s10 offset-s1">
+                <h4>{{ event_name }}</h4>
+                <h4>{{ title }}:</h4>
             </div>
             <div class="col l8 offset-l2 m8 offset-m2 s10 offset-s1 container">           
                 <div class="row">
+                    {{ account_choices }}  
                     {{ tickets_choice }}  
                 </div>
             </div>

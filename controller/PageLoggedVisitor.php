@@ -1,7 +1,5 @@
 <?php
 
-require_once "controller/PageVisitor.php";
-
 class PageLoggedVisitor extends PageVisitor
 {
 
@@ -31,14 +29,13 @@ class PageLoggedVisitor extends PageVisitor
         }
         else {
             //if user has already tickets booked for this event
-            require_once "controller/Ticket.php";
-            if (Ticket::alreadyBookedTickets($this->_url[1])){
+            global $session;
+            if ($this->alreadyBookedTickets($this->_url[1], $session->get("evt_account_id"))){
                 $msg = "You already booked tickets for this event.";
                 $link = "../my_tickets";
                 $this->alertRedirect($msg, $link);
             }
             else {
-                require_once "controller/Event.php";
                 $event = new Event("read", ["id" => $this->_url[1]]);
                 $tickets_choice = $event->setTicketChoice();
                 if (null !== $event->getVarEvent("_nb_available_tickets")){
@@ -47,6 +44,8 @@ class PageLoggedVisitor extends PageVisitor
                 else {
                     $nb_available_tickets = "";
                 }
+                global $session;
+                $account_no_choice = View::makeHtml(["{{ evt_account_id }}" => $session->get("evt_account_id")], "elt_admin_account_no_choice.html");
                 $content = View::makeHtml([
                     "{{ event_id }}" => $event->getVarEvent("_event_id"),
                     "{{ event_name }}" => $event->getVarEvent("_name"),
@@ -54,6 +53,7 @@ class PageLoggedVisitor extends PageVisitor
                     "{{ action }}" => "logged/save_tickets",
                     "{{ title }}" => "Book your tickets",
                     "{{ btn_action }}" => "Book tickets",
+                    "{{ account_choices }}"=> $account_no_choice,
                     "{{ nb_available_tickets }}" => $nb_available_tickets,
                     "{{ nb_tickets_adult_mb }}" => 0,
                     "{{ nb_tickets_adult }}" => 0,
@@ -68,10 +68,9 @@ class PageLoggedVisitor extends PageVisitor
     }
 
     public function save_tickets(){
-        global $session, $safeData;
-        if (!$safeData->postEmpty() && (!empty($session->get("user_name")))){
+        global $safeData;
+        if (!$safeData->postEmpty()){
             $data = $safeData->_post;
-            $data["evt_account_id"] = $session->get("evt_account_id");
             // if not enough tickets left
             $nb_tickets_wanted = 0;
             if (isset($data["nb_tickets_adult_mb"])) $nb_tickets_wanted += $data["nb_tickets_adult_mb"];
@@ -92,7 +91,6 @@ class PageLoggedVisitor extends PageVisitor
                         $this->alertRedirect($msg, $link);
                     }
                 }
-                require_once "controller/Ticket.php";
                 $new_ticket = new Ticket("create", $data);
                 if ($new_ticket){
                         $msg = "Your tickets are booked!";
@@ -135,7 +133,6 @@ class PageLoggedVisitor extends PageVisitor
             $title ="Your tickets";
             $each_ticket;
             foreach ($data["data"] as $row){
-                require_once "controller/Ticket.php";
                 $each_ticket = new Ticket("read", ["id" => $row["ticket_id"]]);
                 $data = $each_ticket->getTicketData();
                 $data["{{ evt_name }}"] = $row["name"];

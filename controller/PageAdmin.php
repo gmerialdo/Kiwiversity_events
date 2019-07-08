@@ -1,7 +1,5 @@
 <?php
 
-require_once "controller/Page.php";
-
 class PageAdmin extends Page
 {
 
@@ -202,13 +200,15 @@ class PageAdmin extends Page
             foreach ($data["data"] as $row){
                 $admin_each_event = new Event("read", ["id" => $row["event_id"]]);
                 $args = $admin_each_event->getEventData();
+                $args["{{ book }}"] = "";
+                $args["{{ modify }}"] = "";
+                $args["{{ delete }}"] = "";
+                if ($current == 1){
+                    $args["{{ book }}"] = View::makeHtml($args, "elt_admin_each_event_book.html");
+                }
                 if ($modify == true){
                     $args["{{ modify }}"] = View::makeHtml($args, "elt_admin_each_event_modify.html");
                     $args["{{ delete }}"] = View::makeHtml($args, "elt_admin_each_event_delete.html");
-                }
-                else {
-                    $args["{{ modify }}"] = "";
-                    $args["{{ delete }}"] = "";
                 }
                 $events .= View::makeHtml($args, "elt_admin_each_event.html");
             }
@@ -281,6 +281,30 @@ class PageAdmin extends Page
 
     /*-------------------------------------------MANAGING ACCOUNTS--------------------------------------------------*/
 
+    public function getActiveAccounts($active = 1){
+        //select accounts in db, by default all active accounts
+            $req = [
+                "fields" => ['evt_account_id'],
+                "from" => "evt_accounts",
+                "where" => ["active_account = ".$active]
+            ];
+        return Model::select($req);
+    }
+
+    public function setAccountChoices(){
+        $data = $this->getActiveAccounts();
+        $account_choices = "";
+        if (isset($data["data"][0])){
+            $each_account;
+            foreach ($data["data"] as $row){
+                $each_account = new Account("read", ["id" => $row["evt_account_id"]]);
+                $args = $each_account->getAccountData();
+                $account_choices .= View::makeHtml($args, "elt_admin_each_account_select.html");
+            }
+        }
+        return View::makeHtml(["{{ accounts_choices }}" => $account_choices], "elt_admin_account_choices.html");
+    }
+
     public function manage_accounts(){
         //get active accounts
         $active_accounts = $this->getSelectedAccounts(1);
@@ -292,13 +316,17 @@ class PageAdmin extends Page
         return ["Manage accounts", $content];
     }
 
+    public function create_account(){
+        $msg = "";
+        if (isset($this->_url[1])){
+            $msg = "An account already exists with this email.";
+        }
+        $content = View::makeHtml(["{{ may_be_event_id }}" => "", "{{ error_msg }}" => $msg], "content_create_account.html");
+        return ["create account", $content];
+    }
+
     public function getSelectedAccounts($active){
-        $req = [
-            "fields" => ['evt_account_id'],
-            "from" => "evt_accounts",
-            "where" => ["active_account = ".$active]
-        ];
-        $data = Model::select($req);
+        $data = $this->getActiveAccounts($active);
         //if no accounts
         $accounts = "";
         if (!isset($data["data"][0])){
@@ -442,8 +470,95 @@ class PageAdmin extends Page
                     $tickets .= View::makeHtml($args, "elt_admin_each_ticket.html");
                 }
             }
-            $content = View::makeHtml(["{{ tickets }}" => $tickets, "{{ event_name }}" => $event->getVarEvent("_name"), "{{ start_weekday }}" => $event->getVarEvent("_start_weekday"),"{{ start_date }}" =>$event->getVarEvent("_start_date")], "content_admin_see_tickets.html");
+            $data = $event->getEventData();
+            $data = array_merge($data, ["{{ tickets }}" => $tickets]);
+            $content = View::makeHtml($data, "content_admin_see_tickets.html");
             return ["See tickets", $content];
+        }
+    }
+
+    public function book_tickets_for(){
+        if (!isset($this->_url[1])){
+            header('Location: manage_events');
+        }
+        else {
+            $event = new Event("read", ["id" => $this->_url[1]]);
+            if ($event->getVarEvent("_active_event") != 1 OR $event->getVarEvent("_enable_booking") == 0){
+                header('Location: manage_events');
+            }
+            $tickets_choice = $event->setTicketChoice();
+            if ($event->getVarEvent("_nb_available_tickets") !== null){
+                $nb_available_tickets = $event->getVarEvent("_nb_available_tickets");
+            }
+            else {
+                $nb_available_tickets = "";
+            }
+            $account_choices = $this->setAccountChoices();
+            $content = View::makeHtml([
+                "{{ event_id }}" => $event->getVarEvent("_event_id"),
+                "{{ event_name }}" => $event->getVarEvent("_name"),
+                "{{ tickets_choice }}" => $tickets_choice,
+                "{{ action }}" => "admin/save_tickets_for",
+                "{{ title }}" => "Book tickets for",
+                "{{ btn_action }}" => "Book tickets",
+                "{{ account_choices }}"=> $account_choices,
+                "{{ nb_available_tickets }}" => $nb_available_tickets,
+                "{{ nb_tickets_adult_mb }}" => 0,
+                "{{ nb_tickets_adult }}" => 0,
+                "{{ nb_tickets_culid_mb }}" => 0,
+                "{{ nb_tickets_child }}" => 0,
+                "{{ nb_tickets_all }}" => 0,
+                "{{ donation }}" => ""
+            ], "content_book_tickets.html");
+            return ["Book tickets", $content];
+        }
+    }
+
+    public function save_tickets_for(){
+        global $safeData;
+        if (!$safeData->postEmpty()){
+            $data = $safeData->_post;
+            //if there are already booked tickets for this account
+            if ($this->alreadyBookedTickets($data["event_id"], $data["evt_account_id"])){
+                $msg = "This account has already booked tickets for this event.";
+                $link = "see_tickets/".$data["event_id"];
+                $this->alertRedirect($msg, $link);
+            }
+            else {
+                // if not enough tickets left
+                $nb_tickets_wanted = 0;
+                if (isset($data["nb_tickets_adult_mb"])) $nb_tickets_wanted += $data["nb_tickets_adult_mb"];
+                if (isset($data["nb_tickets_adult"])) $nb_tickets_wanted += $data["nb_tickets_adult"];
+                if (isset($data["nb_tickets_child_mb"])) $nb_tickets_wanted += $data["nb_tickets_child_mb"];
+                if (isset($data["nb_tickets_child"])) $nb_tickets_wanted += $data["nb_tickets_child"];
+                if (isset($data["nb_tickets_all"])) $nb_tickets_wanted += $data["nb_tickets_all"];
+                if ($nb_tickets_wanted == 0){
+                    $msg = "No tickets selected. Please indicate the number of tickets you want to book.";
+                    $link = "book_tickets_for/".$data["event_id"];
+                    $this->alertRedirect($msg, $link);
+                }
+                else {
+                    if (!empty($data["nb_available_tickets"])){
+                        if ($data["nb_available_tickets"] < $nb_tickets_wanted){
+                            $msg = "Not enough tickets available.";
+                            $link = "book_tickets_for/".$data["event_id"];
+                            $this->alertRedirect($msg, $link);
+                        }
+                    }
+                    $new_ticket = new Ticket("create", $data);
+                    if ($new_ticket){
+                            $msg = "The tickets are booked!";
+                            $link = "see_tickets/".$data["event_id"];
+                            $this->alertRedirect($msg, $link);
+                    }
+                    else {
+                        header('Location: ../display_error');
+                    }
+                }
+            }
+        }
+        else {
+            header('Location: manage_events');
         }
     }
 
@@ -452,14 +567,13 @@ class PageAdmin extends Page
             header('Location: manage_tickets');
         }
         else {
-            require_once "controller/Ticket.php";
             $ticket = new Ticket("read", ["id" => $this->_url[1]]);
             $event = new Event("read", ["id" => $ticket->getVarTicket("_event_id")]);
             $tickets_choice = $event->setTicketChoice();
             if (null !== $event->getVarEvent("_nb_available_tickets")){$nb_available_tickets = $event->getVarEvent("_nb_available_tickets");}
             else { $nb_available_tickets = "";}
             $data["{{ event_id }}"] = $event->getVarEvent("_event_id");
-            $data["{{ event_name }}"] = $event->getVarEvent("_name");
+            $data["{{ name }}"] = $event->getVarEvent("_name");
             $data["{{ tickets_choice }}"] = $tickets_choice;
             $data["{{ action }}"] = "admin/save_modif_tickets/{{ ticket_id }}";
             $data["{{ title }}"] = "Modify those tickets";
@@ -489,7 +603,6 @@ class PageAdmin extends Page
                 $data = $safeData->_post;
                 $data["id"] = $this->_url[1];
                 if (isset($data["total_paid"])){
-                    require_once "controller/Ticket.php";
                     $ticket = new Ticket("read", ["id" => $this->_url[1]]);
                     $data["payment_datetime"] = $ticket->getVarTicket("_payment_datetime");
                 }
@@ -513,7 +626,6 @@ class PageAdmin extends Page
                             $this->alertRedirect($msg, $link);
                         }
                     }
-                    require_once "controller/Ticket.php";
                     $ticket = new Ticket("update", $data);
                     if ($ticket){
                         $event_id = $data["event_id"];
@@ -534,7 +646,6 @@ class PageAdmin extends Page
         else {
             global $safeData;
             if (!$safeData->postEmpty()){
-                require_once "controller/Ticket.php";
                 $ticket = new Ticket("read", ["id" => $this->_url[1]]);
                 $payment_datetime = $safeData->_post["payment_datetime"];
                 if ($payment_datetime == null){ header('Location: ../display_error/admin');}
@@ -548,7 +659,6 @@ class PageAdmin extends Page
                 else {header('Location: ../../display_error/admin');}
             }
             else {
-                require_once "controller/Ticket.php";
                 $ticket = new Ticket("read", ["id" => $this->_url[1]]);
                 $name = new Account("read", ["id" =>  $ticket->getVarTicket("_evt_account_id")]);
                 $args["{{ first_name }}"] = $name->getVarAccount("_first_name");
@@ -569,7 +679,6 @@ class PageAdmin extends Page
             header('Location: manage_tickets');
         }
         else {
-            require_once "controller/Ticket.php";
             $ticket = new Ticket("read", ["id" => $this->_url[1]]);
             $update = $ticket->updateInDB(["payment_datetime", "total_paid"], [null, null]);
             if ($update){
@@ -587,7 +696,6 @@ class PageAdmin extends Page
             header('Location: manage_tickets');
         }
         else {
-            require_once "controller/Ticket.php";
             $ticket = new Ticket("read", ["id" => $this->_url[1]]);
             $event_id = $ticket->getVarTicket("_event_id");
             $cancelled = $ticket->updateInDB(["cancelled_time"], [date("Y-m-d H:i:s")]);
@@ -615,7 +723,6 @@ class PageAdmin extends Page
         else {
             $admin_each_ticket;
             foreach ($data["data"] as $row){
-                require_once "controller/Ticket.php";
                 $admin_each_ticket = new ticket("read", ["id" => $row["ticket_id"]]);
                 if ($admin_each_ticket->getVarTicket("_payment_datetime") != null){
                     $args["{{ cancel_btn }}"] = file_get_contents("template/elt_admin_cancel_payment_btn_cancelled.html");
@@ -653,7 +760,6 @@ class PageAdmin extends Page
             $each_image;
             $i=1;
             foreach ($data["data"] as $row){
-                require_once "controller/Image.php";
                 $each_image = new Image("read", ["id" => $row["image_id"]]);
                 $image_choices .= View::makeHtml(["{{ src }}" => $each_image->getVarImage("_src"), "{{ alt }}" => ucfirst($each_image->getVarImage("_alt")), "{{ nb }}" => $i], "elt_admin_each_image_select.html");
                 $i++;
@@ -677,7 +783,6 @@ class PageAdmin extends Page
         else {
             $admin_each_image;
             foreach ($data["data"] as $row){
-                require_once "controller/Image.php";
                 $admin_each_image = new Image("read", ["id" => $row["image_id"]]);
                 $images .= View::makeHtml([
                     "{{ image_id }}" => $row["image_id"],
@@ -724,13 +829,12 @@ class PageAdmin extends Page
             if (in_array($file["ext"],$extensions) === false){
                 header('Location: create_images/3');
             }
-            require_once "controller/Image.php";
             $image = new Image("create", ["file" => $file]);
-            // if ($image){
-            //     $msg = "The image has been uploaded.";
-            //     $link = "manage_images";
-            //     $this->alertRedirect($msg, $link);
-            // }
+            if ($image){
+                $msg = "The image has been uploaded.";
+                $link = "manage_images";
+                $this->alertRedirect($msg, $link);
+            }
         }
         else {header('Location: manage_images/1');}
     }
@@ -740,7 +844,6 @@ class PageAdmin extends Page
             header('Location: manage_events');
         }
         else {
-            require_once "controller/Image.php";
             $image = new Image("update", ["id" => $this->_url[1]]);
             if ($image){
                 $msg = "Your changes have been updated.";
@@ -756,7 +859,6 @@ class PageAdmin extends Page
             header('Location: manage_images');
         }
         else {
-            require_once "controller/Image.php";
             $image = new Image("delete", ["id" => $this->_url[1]]);
             if ($image){
                 $msg = "The image has been deleted.";
@@ -785,7 +887,6 @@ class PageAdmin extends Page
         if (isset($data["data"][0])){
             $each_location;
             foreach ($data["data"] as $row){
-                require_once "controller/Location.php";
                 $each_location = new Location("read", ["id" => $row["location_id"]]);
                 $location_choices .= View::makeHtml(["{{ name }}" => ucfirst($each_location->getVarLocation("_name")), "{{ location_id }}" => $row["location_id"]], "elt_admin_each_location_select.html");
             }
@@ -803,7 +904,6 @@ class PageAdmin extends Page
         else {
             $admin_each_location;
             foreach ($data["data"] as $row){
-                require_once "controller/Location.php";
                 $admin_each_location = new Location("read", ["id" => $row["location_id"]]);
                 $locations .= View::makeHtml($admin_each_location->getLocationData(), "elt_admin_each_location.html");
             }
@@ -836,7 +936,6 @@ class PageAdmin extends Page
             header('Location: manage_locations');
         }
         else {
-            require_once "controller/Location.php";
             $location = new Location("read", ["id" => $this->_url[1]]);
             $data = $location->getLocationData();
             $data["{{ title }}"] = "Modify the location";
@@ -851,7 +950,6 @@ class PageAdmin extends Page
         global $safeData;
         if (!$safeData->postEmpty()){
             $data = [$safeData->_post["location_name"], $safeData->_post["location_address"], $safeData->_post["location_city"], $safeData->_post["location_zipcode"], $safeData->_post["location_state"], $safeData->_post["location_country"], $safeData->_post["location_phone"], $safeData->_post["max_occupancy"], 1];
-            require_once "controller/Location.php";
             //if modifying location
             if (isset($this->_url[1])){
                 $location = new Location("update", ["id" => $this->_url[1], "data" => $data]);
@@ -882,7 +980,6 @@ class PageAdmin extends Page
             header('Location: manage_locations');
         }
         else {
-            require_once "controller/Location.php";
             $location = new Location("delete", ["id" => $this->_url[1]]);
             if ($location){
                 $msg = "The location has been deleted.";

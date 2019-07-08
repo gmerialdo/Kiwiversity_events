@@ -3,12 +3,22 @@
         <h2>Tickets</h2>
     </div>
     <div class="center-align">
-        <h4>For event: {{ event_name }}, {{ start_date }}</h4>
+        <h4>For event: {{ name }}, {{ start_date }}</h4>
+    </div>
+    <div class="col s6 offset-s3 m4 offset-m4 l2 offset-l5 main_color_txt">
+        <a href="{{ path }}/admin/book_tickets_for/{{ event_id }}" class="main_color_txt">
+            <div class="valign-wrapper">
+                <i class="medium material-icons prefix">add_box</i>
+                <strong>Add tickets for this event</strong>
+            </div>
+        </a>
     </div>
     <div class="col s12 admin_events">
+        <br/>
         {{ tickets }}
     </div>
     <div class="col s12">
         <br><br><br><br><a href="../manage_tickets" class="btn waves-effect waves-light main_color">Return to manage tickets</a>
+        <br/><br/><a href="../manage_events" class="btn waves-effect waves-light main_color">Return to manage events</a>
     </div>
 </div>

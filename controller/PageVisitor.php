@@ -1,7 +1,5 @@
 <?php
 
-require_once "controller/Page.php";
-
 class PageVisitor extends Page
 {
 

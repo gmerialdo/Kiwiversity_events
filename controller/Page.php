@@ -1,9 +1,5 @@
 <?php
 
-require_once "controller/Session.php";
-require_once "controller/Event.php";
-require_once "controller/Account.php";
-
 class Page
 {
 
@@ -186,23 +182,30 @@ class Page
             header('Location: see_all_events');
         }
         else {
+            $msg = "";
+            $may_be_event_id = "";
             if (isset($this->_url[1])) {
-                $may_be_event_id = "/".$this->_url[1];
+                if ($this->_url[1] == "error"){
+                    $msg = "An account already exists with this email. Please log in or click on 'Forgot password'.";
+                    if (isset($this->_url[2])) {
+                        $may_be_event_id = "/".$this->_url[2];
+                    }
+                }
+                else {
+                   $may_be_event_id = "/".$this->_url[1];
+                }
             }
-            else {
-                $may_be_event_id = "";
-            }
-            $content = View::makeHtml(["{{ may_be_event_id }}" => $may_be_event_id], "content_signin.html");
+            $content = View::makeHtml(["{{ may_be_event_id }}" => $may_be_event_id, "{{ error_msg }}" => $msg], "content_create_account.html");
         }
-        return ["signin", $content];
+        return ["Create account", $content];
     }
 
     /*-------------------------------------------MANAGING SIGNIN-------------------------------------------------*/
 
     //funcion that creates an account and logs into session if it worked
-    public function create_account(){
+    public function save_account(){
         global $session, $safeData;
-        if (!$safeData->postEmpty() && (empty($session->get('user_name')))){
+        if (!$safeData->postEmpty()){
             $email = $safeData->_post["new_email"];
             ?>
             <!--keep email in localStorage-->
@@ -216,27 +219,63 @@ class Page
             $data["first_name"] = $safeData->_post["new_first_name"];
             $data["last_name"] = $safeData->_post["new_last_name"];
             $data["password"] = $safeData->_post["new_password"];
-            $new_account = new Account("create", $data);
-            if ($new_account->getVarAccount("_valid") == false){
-                return $this->login("existing_email");
-            }
-            else if (!$new_account){
-                header('Location: ../signin');
-            }
-            else {
-                $msg = "You successfully signed in!";
-                if (isset($this->_url[1])){
-                    $link = "../logged/book_tickets/".$this->_url[1];
+            if (empty($session->get('user_name'))){
+                $new_account = new Account("create", $data);
+                if ($new_account->getVarAccount("_valid") == false){
+                    if (isset($this->_url[1])){
+                        header('Location: signin/error/$this->_url[1]');
+                    }
+                    header('Location: signin/error');
+                }
+                else if (!$new_account){
+                    header('Location: ../signin');
                 }
                 else {
-                    $link = "see_all_events";
+                    $msg = "You successfully signed in!";
+                    if (isset($this->_url[1])){
+                        $link = "../logged/book_tickets/".$this->_url[1];
+                    }
+                    else {
+                        $link = "see_all_events";
+                    }
+                    $this->alertRedirect($msg, $link);
                 }
-                $this->alertRedirect($msg, $link);
+            }
+            elseif ($session->get('evt_managing_rights') == 1){
+                $new_account = new Account("create", $data, true);
+                if ($new_account->getVarAccount("_valid") == false){
+                    header('Location: admin/create_account/error');
+                }
+                else if (!$new_account){
+                    header('Location: ../display_error/admin');
+                }
+                else {
+                    $msg = "The account has been created!";
+                    $link = "admin/manage_accounts";
+                    $this->alertRedirect($msg, $link);
+                }
             }
         }
         else {
             header('Location: ');
         }
+    }
+
+    /*------------------------------------------VARIOUS OPERATIONS ON TICKETS------------------------------------------------*/
+
+    public function alreadyBookedTickets($event_id, $evt_account_id){
+        $req = [
+            "fields" => ["*"],
+            "from" => "evt_tickets",
+            "where" => [
+                "event_id = ".$event_id,
+                "evt_account_id = ".$evt_account_id,
+                "cancelled_time is NULL"
+            ]
+        ];
+        $data = Model::select($req);
+        //return true if not empty or false otherwise
+        return !empty($data["data"]);
     }
 
     /*-------------------------------------------MANAGING JAVASCRIPT MESSAGES--------------------------------------*/

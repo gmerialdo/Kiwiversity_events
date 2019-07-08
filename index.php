@@ -1,13 +1,16 @@
 <?php
 
-require_once "controller/Session.php";
-require_once "controller/Security.php";
-require_once "controller/Page.php";
 require_once "model/Model.php";
 require_once "view/View.php";
 require_once "conf.php";
 
 Model::init();
+
+//autoload for all controllers
+function my_autoloader($class) {
+    require_once("controller/".$class.".php");
+}
+spl_autoload_register('my_autoloader');
 
 global $envProd, $uri_Start;
 $session = new Session();
@@ -40,6 +43,7 @@ $safeData = new Security([
         "members_only" => FILTER_SANITIZE_NUMBER_INT,
         "enable_booking" => FILTER_SANITIZE_NUMBER_INT,
         "max_tickets" => FILTER_SANITIZE_NUMBER_INT,
+        "evt_account_id"=> FILTER_SANITIZE_NUMBER_INT,
         "nb_tickets_adult_mb" => FILTER_SANITIZE_NUMBER_INT,
         "nb_tickets_adult" => FILTER_SANITIZE_NUMBER_INT,
         "nb_tickets_child_mb" => FILTER_SANITIZE_NUMBER_INT,
@@ -77,18 +81,18 @@ $safeData = new Security([
 // decide if it's visitor mode or admin mode and create page
 switch ($safeData->_url[0]){
     case 'admin':
-        require_once "controller/PageAdmin.php";
         $page = new PageAdmin($safeData->_url);
         break;
     case 'logged':
-        require_once "controller/PageLoggedVisitor.php";
         $page = new PageLoggedVisitor($safeData->_url);
         break;
     default:
-        require_once "controller/PageVisitor.php";
         $page = new PageVisitor($safeData->_url);
         break;
 }
+
+
+
 
 // display page
 echo $page->getHtmlPage();

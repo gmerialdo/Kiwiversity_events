@@ -105,9 +105,7 @@ class Event
     }
 
     public function getEventData(){
-        require_once "controller/Image.php";
         $image = new Image("read", ["id" => $this->_image_id]);
-        require_once "controller/Location.php";
         $location = new Location("read", ["id" => $this->_location_id]);
         if ($this->_enable_booking){$enabled = "Open for booking";} else {$enabled = "Booking disabled";}
         return array_merge($location->getLocationData(), [
@@ -222,7 +220,6 @@ class Event
             if (isset($data["data"][0])){
                 $ticket;
                 foreach ($data["data"] as $row) {
-                    require_once("controller/Ticket.php");
                     $ticket = new Ticket("read", ["id" => $row["ticket_id"]]);
                     $booked_tickets += $ticket->getVarTicket("_total_nb_tickets");
                 }

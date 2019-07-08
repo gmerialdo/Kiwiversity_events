@@ -16,7 +16,7 @@ class Account
     private $_active_account;
 
 
-    public function __construct($todo, $args){
+    public function __construct($todo, $args, $admin=false){
         switch ($todo){
             case "login":
                 $this->_valid = $this->validateLogin($args["user_name"], $args["password"]);
@@ -35,7 +35,7 @@ class Account
                 if ($this->_valid == false){
                     return false;
                 }
-                return $this->createAccount($args);
+                return $this->createAccount($args, $admin);
                 break;
             case "update":
                 $this->_evt_account_id = $args["id"];
@@ -128,7 +128,7 @@ class Account
         return empty($data["data"]);
     }
 
-    public function createAccount($args){
+    public function createAccount($args, $admin){
         $email = $args["email"];
         $data = [
             $email ,
@@ -153,8 +153,10 @@ class Account
         ];
         $create = Model::insert($req, $data);
         $this->_evt_account_id = $create["data"];
-        $this->setAccountDataFromDB();
-        $this->logSession();
+        if (!$admin){
+            $this->setAccountDataFromDB();
+            $this->logSession();
+        }
         return $create["succeed"];
     }
 

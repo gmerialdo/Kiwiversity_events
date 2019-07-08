@@ -156,23 +156,6 @@ class Ticket
         return $total;
     }
 
-    public static function alreadyBookedTickets($event_id){
-        global $session;
-        $id = $session->get("evt_account_id");
-        $req = [
-                "fields" => ["*"],
-                "from" => "evt_tickets",
-                "where" => [
-                    "event_id ='$event_id'",
-                    "evt_account_id = ".$id,
-                    "cancelled_time is NULL"
-                ]
-        ];
-        $data = Model::select($req);
-        //return true if not empty or false otherwise
-        return !empty($data["data"]);
-    }
-
     public function calculateTotalNbTickets(){
         $total = 0;
         if (isset($this->_nb_tickets_adult_mb)) $total += $this->_nb_tickets_adult_mb;
