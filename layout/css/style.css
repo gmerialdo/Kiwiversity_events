@@ -73,15 +73,15 @@ em.tiny_text {
 }
 
 .add_image {
-  border: solid 4px;
-  border-radius: 5px;  
+  border: solid 4px;  
+  border-radius: 5px;
 }
 
 .btn_change_img {
-    background: none;
-    border: none;
-    color: #039be5;
-    cursor: pointer;
+  background: none;
+  border: none;
+  color: #039be5;
+  cursor: pointer;
 }
 
 .each_image {
