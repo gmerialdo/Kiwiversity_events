@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", function() {
     var instancesSelectNbTickets = M.FormSelect.init(elemsSelectNbTickets);
 });
 
-function test_pass() {
+function testPass() {
     var level = "";
     try {
         var mdp = document.getElementById("new_password").value;
@@ -61,7 +61,7 @@ function test_pass() {
 }
 
 function checkSecurityPW(){
-    document.getElementById("level_mdp").innerHTML=test_pass();
+    document.getElementById("level_mdp").innerHTML=testPass();
 }
 
 function highlight(field, error){
