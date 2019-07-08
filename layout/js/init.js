@@ -25,7 +25,7 @@ function testPass() {
             var c = mdp.charAt(i);
             chrs[c] = 0;
         }
-        for (var i=0;i<size;i++){
+        for (i=0;i<size;i++){
             var c = mdp.charAt(i);
             var cv = 0;
             chrs[c] = chrs[c] + 1
@@ -40,7 +40,7 @@ function testPass() {
                     }
                 }
             }
-            security = security + cv
+            security = security + cv;
         }
         if (security >= 13){
             level="Level of security: High";
@@ -85,4 +85,3 @@ function verifyPw(field){
         return true;
     }
 }
-
