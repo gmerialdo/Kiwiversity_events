@@ -26,9 +26,9 @@ function testPass() {
             chrs[c] = 0;
         }
         for (i=0;i<size;i++){
-            var c = mdp.charAt(i);
+            c = mdp.charAt(i);
             var cv = 0;
-            chrs[c] = chrs[c] + 1
+            chrs[c] ++;
             if (chrs[c] < 4){
                 cv = 1;
                 if (digit.test(c)){
