@@ -76,7 +76,7 @@ function highlight(field, error){
 }
 
 function verifyPw(field){
-    if(field.value != document.getElementById("new_password").value){
+    if(field.value !== document.getElementById("new_password").value){
         highlight(field, true);
         return false;
     }
