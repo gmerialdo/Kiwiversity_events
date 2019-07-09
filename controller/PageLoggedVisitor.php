@@ -45,15 +45,15 @@ class PageLoggedVisitor extends PageVisitor
                     $nb_available_tickets = "";
                 }
                 global $session;
-                $account_no_choice = View::makeHtml(["{{ evt_account_id }}" => $session->get("evt_account_id")], "elt_admin_account_no_choice.html");
-                $content = View::makeHtml([
+                $elt_view = new View(["{{ evt_account_id }}" => $session->get("evt_account_id")], "elt_admin_account_no_choice.html");
+                $view = new View([
                     "{{ event_id }}" => $event->getVarEvent("_event_id"),
                     "{{ event_name }}" => $event->getVarEvent("_name"),
                     "{{ tickets_choice }}" => $tickets_choice,
                     "{{ action }}" => "logged/save_tickets",
                     "{{ title }}" => "Book your tickets",
                     "{{ btn_action }}" => "Book tickets",
-                    "{{ account_choices }}"=> $account_no_choice,
+                    "{{ account_choices }}"=> $elt_view->_html,
                     "{{ nb_available_tickets }}" => $nb_available_tickets,
                     "{{ nb_tickets_adult_mb }}" => 0,
                     "{{ nb_tickets_adult }}" => 0,
@@ -62,7 +62,7 @@ class PageLoggedVisitor extends PageVisitor
                     "{{ nb_tickets_all }}" => 0,
                     "{{ donation }}" => ""
                 ], "content_book_tickets.html");
-                return ["Book tickets", $content];
+                return ["Book tickets", $view->_html];
             }
         }
     }
@@ -123,7 +123,8 @@ class PageLoggedVisitor extends PageVisitor
             ],
             "order" => "e.start_datetime"
         ];
-        $data = Model::select($req);
+        global $model;
+        $data = $model->select($req);
         $my_tickets = "";
         //if no tickets
         if (!isset($data["data"][0])){
@@ -132,19 +133,21 @@ class PageLoggedVisitor extends PageVisitor
         else {
             $title ="Your tickets";
             $each_ticket;
+            $each_view;
             foreach ($data["data"] as $row){
                 $each_ticket = new Ticket("read", ["id" => $row["ticket_id"]]);
                 $data = $each_ticket->getTicketData();
                 $data["{{ evt_name }}"] = $row["name"];
                 $data["{{ evt_date }}"] = date("D, M jS Y", strtotime($row["start_datetime"]));
-                $my_tickets .= View::makeHtml($data,"elt_each_ticket.html");
+                $each_view = new View($data,"elt_each_ticket.html");
+                $my_tickets .= $each_view->_html;
             }
         }
-        $content = View::makeHtml([
+        $view = new View([
             "{{ title }}" => $title,
             "{{ my_tickets }}" => $my_tickets
         ], "content_see_my_tickets.html");
-        return ["My tickets", $content];
+        return ["My tickets", $view->_html];
     }
 
     /*-------------------------------------------MANAGE ACCOUNT SETTINGS--------------------------------------------*/
@@ -180,13 +183,14 @@ class PageLoggedVisitor extends PageVisitor
                 "where" => ["evt_account_id = ".$session->get("evt_account_id")],
                 "limit" => 1
             ];
-            $data = Model::select($req);
-            $content = View::makeHtml([
+            global $model;
+            $data = $model->select($req);
+            $view = new View([
                 "{{ first_name }}" => $data["data"][0]["first_name"],
                 "{{ last_name }}" => $data["data"][0]["last_name"],
                 "{{ email }}" => $data["data"][0]["email"]
             ], "content_account_settings.html");
-            return ["Account settings", $content];
+            return ["Account settings", $view->_html];
         }
     }
 

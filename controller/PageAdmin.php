@@ -33,7 +33,7 @@ class PageAdmin extends Page
     public function create_event(){
         $location_choices = $this->setLocationChoices();
         $image_choices = $this->setImageChoices();
-        $content = View::makeHtml([
+        $view = new View([
             "{{ name }}" => "",
             "{{ description }}" => "",
             "{{ location_choices }}" => $location_choices,
@@ -62,7 +62,7 @@ class PageAdmin extends Page
             "{{ action }}" => "save_event",
             "{{ button }}" => "Create the event"
         ], "content_admin_create_event.html");
-        return ["Create event", $content];
+        return ["Create event", $view->_html];
     }
 
     public function save_event(){
@@ -127,8 +127,8 @@ class PageAdmin extends Page
                     $args["{{ action }}"] = "save_event";
                     $args["{{ button }}"] = "Create the event";
                 }
-                $content = View::makeHtml($args, "content_admin_create_event.html");
-                return ["Event", $content];
+                $view = new View($args, "content_admin_create_event.html");
+                return ["Event", $view->_html];
             }
             $data = [$name, $description, $location_id, $image_id, $category, $active_event, $start_datetime, $finish_datetime, $max_tickets, $type_tickets, $public, $members_only, $price_adult_mb, $price_adult, $price_child_mb, $price_child, $enable_booking];
             //print_r($data);
@@ -168,14 +168,14 @@ class PageAdmin extends Page
         $draft_events = $this->getSelectedEvents(0);
         $past_events = $this->getSelectedEvents(1, 0, false);
         //$trash_events = $this->getSelectedEvents(2);
-        $content = View::makeHtml([
+        $view = new View([
             "{{ msg }}" => $msg,
             "{{ current_events }}" => $current_events,
             "{{ draft_events }}" => $draft_events,
             "{{ past_events }}" => $past_events,
             //"{{ trash_events }}" => $trash_events
         ], "content_admin_manage_events.html");
-        return ["Manage events", $content];
+        return ["Manage events", $view->_html];
 
     }
 
@@ -189,28 +189,35 @@ class PageAdmin extends Page
             "where" => $where,
             "order" => "start_datetime"
         ];
-        $data = Model::select($req);
+        global $model;
+        $data = $model->select($req);
         //if no events
         $events = "";
         if (!isset($data["data"][0])){
             $events = "No event";
         }
         else {
-            $admin_each_event;
+            $each_event;
+            $each_view;
+            $elt_view;
             foreach ($data["data"] as $row){
-                $admin_each_event = new Event("read", ["id" => $row["event_id"]]);
-                $args = $admin_each_event->getEventData();
+                $each_event = new Event("read", ["id" => $row["event_id"]]);
+                $args = $each_event->getEventData();
                 $args["{{ book }}"] = "";
                 $args["{{ modify }}"] = "";
                 $args["{{ delete }}"] = "";
                 if ($current == 1){
-                    $args["{{ book }}"] = View::makeHtml($args, "elt_admin_each_event_book.html");
+                    $elt_view = new View($args, "elt_admin_each_event_book.html");
+                    $args["{{ book }}"] = $elt_view->_html;
                 }
                 if ($modify == true){
-                    $args["{{ modify }}"] = View::makeHtml($args, "elt_admin_each_event_modify.html");
-                    $args["{{ delete }}"] = View::makeHtml($args, "elt_admin_each_event_delete.html");
+                    $elt_view = new View($args, "elt_admin_each_event_modify.html");
+                    $args["{{ modify }}"] = $elt_view->_html;
+                    $elt_view = new View($args, "elt_admin_each_event_delete.html");
+                    $args["{{ delete }}"] = $elt_view->_html;
                 }
-                $events .= View::makeHtml($args, "elt_admin_each_event.html");
+                $each_view = new View($args, "elt_admin_each_event.html");
+                $events .= $each_view->_html;
             }
         }
         return $events;
@@ -231,8 +238,8 @@ class PageAdmin extends Page
             $data["{{ button }}"] = "Modify the event";
             $data["{{ location_choices }}"] = $location_choices;
             $data["{{ image_choices }}"] = $image_choices;
-            $content = View::makeHtml($data, "content_admin_create_event.html");
-            return ["Modify event", $content];
+            $view = new View($data, "content_admin_create_event.html");
+            return ["Modify event", $view->_html];
         }
     }
 
@@ -272,8 +279,8 @@ class PageAdmin extends Page
                 $data["{{ title }}"] = "Create a new event";
                 $data["{{ action }}"] = "save_event";
                 $data["{{ button }}"] = "Create the event";
-                $content = View::makeHtml($data, "content_admin_create_event.html");
-                return ["Duplicate event", $content];
+                $view = new View($data, "content_admin_create_event.html");
+                return ["Duplicate event", $view->_html];
             }
             else {header('Location: ../../display_error/admin');}
         }
@@ -283,12 +290,13 @@ class PageAdmin extends Page
 
     public function getActiveAccounts($active = 1){
         //select accounts in db, by default all active accounts
-            $req = [
-                "fields" => ['evt_account_id'],
-                "from" => "evt_accounts",
-                "where" => ["active_account = ".$active]
-            ];
-        return Model::select($req);
+        $req = [
+            "fields" => ['evt_account_id'],
+            "from" => "evt_accounts",
+            "where" => ["active_account = ".$active]
+        ];
+        global $model;
+        return $model->select($req);
     }
 
     public function setAccountChoices(){
@@ -296,24 +304,27 @@ class PageAdmin extends Page
         $account_choices = "";
         if (isset($data["data"][0])){
             $each_account;
+            $each_view;
             foreach ($data["data"] as $row){
                 $each_account = new Account("read", ["id" => $row["evt_account_id"]]);
                 $args = $each_account->getAccountData();
-                $account_choices .= View::makeHtml($args, "elt_admin_each_account_select.html");
+                $each_view = new View($args, "elt_admin_each_account_select.html");
+                $account_choices .= $each_view->_html;
             }
         }
-        return View::makeHtml(["{{ accounts_choices }}" => $account_choices], "elt_admin_account_choices.html");
+        $view = new View(["{{ accounts_choices }}" => $account_choices], "elt_admin_account_choices.html");
+        return $view->_html;
     }
 
     public function manage_accounts(){
         //get active accounts
         $active_accounts = $this->getSelectedAccounts(1);
         $inactive_accounts = $this->getSelectedAccounts(0);
-        $content = View::makeHtml([
+        $view = new View([
             "{{ active_accounts }}" => $active_accounts,
             "{{ inactive_accounts }}" => $inactive_accounts,
         ], "content_admin_manage_accounts.html");
-        return ["Manage accounts", $content];
+        return ["Manage accounts", $view->_html];
     }
 
     public function create_account(){
@@ -321,8 +332,8 @@ class PageAdmin extends Page
         if (isset($this->_url[1])){
             $msg = "An account already exists with this email.";
         }
-        $content = View::makeHtml(["{{ may_be_event_id }}" => "", "{{ error_msg }}" => $msg], "content_create_account.html");
-        return ["create account", $content];
+        $view = new View(["{{ may_be_event_id }}" => "", "{{ error_msg }}" => $msg], "content_create_account.html");
+        return ["create account", $view->_html];
     }
 
     public function getSelectedAccounts($active){
@@ -333,15 +344,31 @@ class PageAdmin extends Page
             $accounts = "No account";
         }
         else {
-            $admin_each_account;
+            $each_account;
+            $each_view;
+            $elt_view;
             foreach ($data["data"] as $row){
-                $admin_each_account = new Account("read", ["id" => $row["evt_account_id"]]);
-                $args = $admin_each_account->getAccountData();
-                if ($args["{{ managing_rights }}"] == 1){$args["{{ btn_admin_rights }}"] = View::makeHtml($args, "elt_admin_each_account_remove_rights.html");}
-                else {$args["{{ btn_admin_rights }}"] = View::makeHtml($args, "elt_admin_each_account_give_rights.html");}
-                if ($args["{{ active_account }}"] == 1){$args["{{ btn_activate }}"] = View::makeHtml($args, "elt_admin_each_account_deactivate.html");}
-                else {$args["{{ btn_activate }}"] = View::makeHtml($args, "elt_admin_each_account_activate.html"); $args["{{ btn_admin_rights }}"] = "";}
-                $accounts .= View::makeHtml($args, "elt_admin_each_account.html");
+                $each_account = new Account("read", ["id" => $row["evt_account_id"]]);
+                $args = $each_account->getAccountData();
+                if ($args["{{ managing_rights }}"] == 1){
+                    $elt_view = new View($args, "elt_admin_each_account_remove_rights.html");
+                    $args["{{ btn_admin_rights }}"] = $elt_view->_html;
+                }
+                else {
+                    $elt_view = new View($args, "elt_admin_each_account_give_rights.html");
+                    $args["{{ btn_admin_rights }}"] = $elt_view->_html;
+                }
+                if ($args["{{ active_account }}"] == 1){
+                    $elt_view = new View($args, "elt_admin_each_account_deactivate.html");
+                    $args["{{ btn_activate }}"] = $elt_view->_html;
+                }
+                else {
+                    $elt_view = new View($args, "elt_admin_each_account_activate.html");
+                    $args["{{ btn_activate }}"] = $elt_view->_html;
+                    $args["{{ btn_admin_rights }}"] = "";
+                }
+                $each_view = new View($args, "elt_admin_each_account.html");
+                $accounts .= $each_view->_html;
             }
         }
         return $accounts;
@@ -419,27 +446,30 @@ class PageAdmin extends Page
             ],
             "order" => "start_datetime"
         ];
-        $data = Model::select($req);
+        global $model;
+        $data = $model->select($req);
         //if no events
         $events_tickets = "";
         if (!isset($data["data"][0])){
             $events_tickets = "No event";
         }
         else {
-            $admin_each_event;
+            $each_event;
+            $each_view;
             $nb_tickets;
             foreach ($data["data"] as $row){
-                $admin_each_event = new Event("read", ["id" => $row["event_id"]]);
-                $args = $admin_each_event->getEventData();
-                if ( $admin_each_event->getVarEvent("_nb_booked_tickets") == 0 ){$args["{{ tickets }}"] = "No ticket booked";}
-                else {$args["{{ tickets }}"] = "Tickets booked: ".$admin_each_event->getVarEvent("_nb_booked_tickets");}
-                if ($admin_each_event->getVarEvent("_max_tickets") !== null){$args["{{ available_tickets }}"] = $admin_each_event->getVarEvent("_nb_available_tickets");}
+                $each_event = new Event("read", ["id" => $row["event_id"]]);
+                $args = $each_event->getEventData();
+                if ( $each_event->getVarEvent("_nb_booked_tickets") == 0 ){$args["{{ tickets }}"] = "No ticket booked";}
+                else {$args["{{ tickets }}"] = "Tickets booked: ".$each_event->getVarEvent("_nb_booked_tickets");}
+                if ($each_event->getVarEvent("_max_tickets") !== null){$args["{{ available_tickets }}"] = $each_event->getVarEvent("_nb_available_tickets");}
                 else {$args["{{ available_tickets }}"] = "illimited"; $args["{{ max_tickets }}"] = "undefined";}
-                $events_tickets .= View::makeHtml($args, "elt_admin_each_event_tickets.html");
+                $each_view = new View($args, "elt_admin_each_event_tickets.html");
+                $events_tickets .= $each_view->_html;
             }
         }
-        $content = View::makeHtml(["{{ events_tickets }}" => $events_tickets], "content_admin_manage_tickets.html");
-        return ["Manage tickets", $content];
+        $view = new View(["{{ events_tickets }}" => $events_tickets], "content_admin_manage_tickets.html");
+        return ["Manage tickets", $view->_html];
     }
 
     public function see_tickets(){
@@ -453,7 +483,8 @@ class PageAdmin extends Page
                 "from" => "evt_tickets",
                 "where" => ["event_id = ".$this->_url[1], "cancelled_time IS NULL"]
             ];
-            $data = Model::select($req);
+            global $model;
+            $data = $model->select($req);
             $tickets = "";
             //if no tickets
             if (!isset($data["data"][0])){
@@ -461,21 +492,23 @@ class PageAdmin extends Page
             }
             else {
                 $each_ticket;
+                $each_view;
                 foreach ($data["data"] as $row){
                     $each_ticket = new ticket("read", ["id" => $row["ticket_id"]]);
                     $ticket_data = $each_ticket->getticketData();
                     $account = new Account("read", ["id" =>  $each_ticket->getVarTicket("_evt_account_id")]);
                     $ticket_data["{{ first_name }}"] = $account->getVarAccount("_first_name");
                     $ticket_data["{{ last_name }}"] = $account->getVarAccount("_last_name");
-                    $tickets .= View::makeHtml($ticket_data, "elt_admin_each_ticket.html");
+                    $each_view = new View($ticket_data, "elt_admin_each_ticket.html");
+                    $tickets .= $each_view->_html;
                 }
             }
             $args = $event->getEventData();
             if ($event->getVarEvent("_max_tickets") !== null){$args["{{ available_tickets }}"] = $event->getVarEvent("_nb_available_tickets");}
             else {$args["{{ available_tickets }}"] = "illimited"; $args["{{ max_tickets }}"] = "undefined";}
             $args = array_merge($args, ["{{ tickets }}" => $tickets]);
-            $content = View::makeHtml($args, "content_admin_see_tickets.html");
-            return ["See tickets", $content];
+            $view = new View($args, "content_admin_see_tickets.html");
+            return ["See tickets", $view->_html];
         }
     }
 
@@ -496,7 +529,7 @@ class PageAdmin extends Page
                 $nb_available_tickets = "";
             }
             $account_choices = $this->setAccountChoices();
-            $content = View::makeHtml([
+            $view = new View([
                 "{{ event_id }}" => $event->getVarEvent("_event_id"),
                 "{{ event_name }}" => $event->getVarEvent("_name"),
                 "{{ tickets_choice }}" => $tickets_choice,
@@ -512,7 +545,7 @@ class PageAdmin extends Page
                 "{{ nb_tickets_all }}" => 0,
                 "{{ donation }}" => ""
             ], "content_book_tickets.html");
-            return ["Book tickets", $content];
+            return ["Book tickets", $view->_html];
         }
     }
 
@@ -577,7 +610,8 @@ class PageAdmin extends Page
             $data["{{ event_id }}"] = $event->getVarEvent("_event_id");
             $data["{{ event_name }}"] = $event->getVarEvent("_name");
             global $session;
-            $data["{{ account_choices }}"] = View::makeHtml(["{{ evt_account_id }}" => $session->get("evt_account_id")], "elt_admin_account_no_choice.html");
+            $elt_view = new View(["{{ evt_account_id }}" => $session->get("evt_account_id")], "elt_admin_account_no_choice.html");
+            $data["{{ account_choices }}"] = $elt_view->_html;
             $data["{{ tickets_choice }}"] = $tickets_choice;
             $data["{{ action }}"] = "admin/save_modif_tickets/{{ ticket_id }}";
             $data["{{ title }}"] = "Modify those tickets";
@@ -592,8 +626,8 @@ class PageAdmin extends Page
             if (isset($data["{{ nb_tickets_all }}"])) $nb_already_booked += $data["{{ nb_tickets_all }}"];
             //add $nb_already_booked into available tickets
             $data["{{ nb_available_tickets }}"] = $nb_available_tickets + $nb_already_booked;
-            $content = View::makeHtml($data, "content_book_tickets.html");
-            return ["Modify tickets", $content];
+            $view = new View($data, "content_book_tickets.html");
+            return ["Modify tickets", $view->_html];
         }
     }
 
@@ -668,12 +702,12 @@ class PageAdmin extends Page
                 $args["{{ first_name }}"] = $name->getVarAccount("_first_name");
                 $args["{{ last_name }}"] = $name->getVarAccount("_last_name");
                 if ($ticket->getVarTicket("_payment_datetime") != null){
-                    $args["{{ cancel_payment_btn }}"] = View::makeHtml([], "elt_admin_cancel_payment_btn.html");
+                    $args["{{ cancel_payment_btn }}"] = file_get_contents("template/elt_admin_cancel_payment_btn.html");
                 }
                 else {$args["{{ cancel_payment_btn }}"] = "";}
                 $args = array_merge($args, $args = $ticket->getTicketData());
-                $content = View::makeHtml($args, "content_admin_modify_payment.html");
-                return ["Modify payment", $content];
+                $view = new View($args, "content_admin_modify_payment.html");
+                return ["Modify payment", $view->_html];
             }
         }
     }
@@ -718,31 +752,34 @@ class PageAdmin extends Page
             "from" => "evt_tickets",
             "where" => ["cancelled_time IS NOT NULL"]
         ];
-        $data = Model::select($req);
+        global $model;
+        $data = $model->select($req);
         $tickets = "";
         //if no tickets
         if (!isset($data["data"][0])){
             $tickets = "No cancelled ticket";
         }
         else {
-            $admin_each_ticket;
+            $each_ticket;
+            $each_view;
             foreach ($data["data"] as $row){
-                $admin_each_ticket = new ticket("read", ["id" => $row["ticket_id"]]);
-                if ($admin_each_ticket->getVarTicket("_payment_datetime") != null){
+                $each_ticket = new ticket("read", ["id" => $row["ticket_id"]]);
+                if ($each_ticket->getVarTicket("_payment_datetime") != null){
                     $args["{{ cancel_btn }}"] = file_get_contents("template/elt_admin_cancel_payment_btn_cancelled.html");
                 }
                 else {$args["{{ cancel_btn }}"] = "";}
-                $name = new Account("read", ["id" =>  $admin_each_ticket->getVarTicket("_evt_account_id")]);
+                $name = new Account("read", ["id" =>  $each_ticket->getVarTicket("_evt_account_id")]);
                 $args["{{ first_name }}"] = $name->getVarAccount("_first_name");
                 $args["{{ last_name }}"] = $name->getVarAccount("_last_name");
-                $event = new Event("read", ["id" => $admin_each_ticket->getVarTicket("_event_id")]);
+                $event = new Event("read", ["id" => $each_ticket->getVarTicket("_event_id")]);
                 $args["{{ event_name }}"] = $event->getVarEvent("_name");
-                $args = array_merge($args, $admin_each_ticket->getticketData());
-                $tickets .= View::makeHtml($args, "elt_admin_each_cancelled_ticket.html");
+                $args = array_merge($args, $each_ticket->getticketData());
+                $each_view = new View($args, "elt_admin_each_cancelled_ticket.html");
+                $tickets .= $each_view->_html;
             }
         }
-        $content = View::makeHtml(["{{ cancelled_tickets }}" => $tickets], "content_admin_see_cancelled_tickets.html");
-        return ["See cancelled tickets", $content];
+        $view = new View(["{{ cancelled_tickets }}" => $tickets], "content_admin_see_cancelled_tickets.html");
+        return ["See cancelled tickets", $view->_html];
     }
 
     /*-------------------------------------------MANAGING IMAGES--------------------------------------------------*/
@@ -754,7 +791,8 @@ class PageAdmin extends Page
             "from" => "evt_images",
             "where" => ["active = 1"]
         ];
-        return  Model::select($req);
+        global $model;
+        return  $model->select($req);
     }
 
     public function setImageChoices(){
@@ -762,10 +800,16 @@ class PageAdmin extends Page
         $image_choices = "";
         if (isset($data["data"][0])){
             $each_image;
+            $each_view;
             $i=1;
             foreach ($data["data"] as $row){
                 $each_image = new Image("read", ["id" => $row["image_id"]]);
-                $image_choices .= View::makeHtml(["{{ src }}" => $each_image->getVarImage("_src"), "{{ alt }}" => ucfirst($each_image->getVarImage("_alt")), "{{ nb }}" => $i], "elt_admin_each_image_select.html");
+                $each_view = new View([
+                    "{{ src }}" => $each_image->getVarImage("_src"),
+                    "{{ alt }}" => ucfirst($each_image->getVarImage("_alt")),
+                    "{{ nb }}" => $i
+                ], "elt_admin_each_image_select.html");
+                $image_choices .= $each_view->_html;
                 $i++;
             }
         }
@@ -778,25 +822,28 @@ class PageAdmin extends Page
             "from" => "evt_images",
             "where" => ["active = 1"]
         ];
-        $data = Model::select($req);
+        global $model;
+        $data = $model->select($req);
         //if no images
         $images = "";
         if (!isset($data["data"][0])){
             $images = "No images";
         }
         else {
-            $admin_each_image;
+            $each_image;
+            $each_view;
             foreach ($data["data"] as $row){
-                $admin_each_image = new Image("read", ["id" => $row["image_id"]]);
-                $images .= View::makeHtml([
+                $each_image = new Image("read", ["id" => $row["image_id"]]);
+                $each_view = new View([
                     "{{ image_id }}" => $row["image_id"],
-                    "{{ image_src }}" => $admin_each_image->getVarImage("_src"),
-                    "{{ image_alt }}" => ucfirst($admin_each_image->getVarImage("_alt")),
+                    "{{ image_src }}" => $each_image->getVarImage("_src"),
+                    "{{ image_alt }}" => ucfirst($each_image->getVarImage("_alt")),
                 ], "elt_admin_each_image.html");
+                $images .= $each_view->_html;
             }
         }
-        $content = View::makeHtml(["{{ active_images }}" => $images], "content_admin_manage_images.html");
-        return ["Manage images", $content];
+        $view = new View(["{{ active_images }}" => $images], "content_admin_manage_images.html");
+        return ["Manage images", $view->_html];
     }
 
     public function create_image(){
@@ -814,8 +861,8 @@ class PageAdmin extends Page
                     break;
             }
         }
-        $content = View::makeHtml(["{{ error_msg }}" => $error], "content_admin_create_image.html");
-        return ["Add image", $content];
+        $view = new View(["{{ error_msg }}" => $error], "content_admin_create_image.html");
+        return ["Add image", $view->_html];
     }
 
     public function save_image(){
@@ -881,7 +928,8 @@ class PageAdmin extends Page
             "from" => "evt_locations",
             "where" => ["active = 1"]
         ];
-        return Model::select($req);
+        global $model;
+        return $model->select($req);
     }
 
     public function setLocationChoices(){
@@ -889,9 +937,14 @@ class PageAdmin extends Page
         $location_choices = "";
         if (isset($data["data"][0])){
             $each_location;
+            $each_view;
             foreach ($data["data"] as $row){
                 $each_location = new Location("read", ["id" => $row["location_id"]]);
-                $location_choices .= View::makeHtml(["{{ name }}" => ucfirst($each_location->getVarLocation("_name")), "{{ location_id }}" => $row["location_id"]], "elt_admin_each_location_select.html");
+                $each_view = new View([
+                    "{{ name }}" => ucfirst($each_location->getVarLocation("_name")),
+                    "{{ location_id }}" => $row["location_id"]
+                ], "elt_admin_each_location_select.html");
+                $location_choices .= $each_view->_html;
             }
         }
         return $location_choices;
@@ -905,20 +958,22 @@ class PageAdmin extends Page
             $locations = "No locations";
         }
         else {
-            $admin_each_location;
+            $each_location;
+            $each_view;
             foreach ($data["data"] as $row){
-                $admin_each_location = new Location("read", ["id" => $row["location_id"]]);
-                $locations .= View::makeHtml($admin_each_location->getLocationData(), "elt_admin_each_location.html");
+                $each_location = new Location("read", ["id" => $row["location_id"]]);
+                $each_view = new View($each_location->getLocationData(), "elt_admin_each_location.html");
+                $locations .= $each_view->_html;
             }
         }
-        $content = View::makeHtml([
+        $view = new View([
             "{{ active_locations }}" => $locations
         ], "content_admin_manage_locations.html");
-        return ["Manage locations", $content];
+        return ["Manage locations", $view->_html];
     }
 
     public function create_location(){
-        $content = View::makeHtml([
+        $view = new View([
             "{{ location_name }}" => "",
             "{{ location_address }}" => "",
             "{{ location_city }}" => "",
@@ -931,7 +986,7 @@ class PageAdmin extends Page
             "{{ action }}" => "save_location",
             "{{ button }}" => "Add the location"
         ], "content_admin_create_location.html");
-        return ["Add location", $content];
+        return ["Add location", $view->_html];
     }
 
     public function modify_location(){
@@ -944,8 +999,8 @@ class PageAdmin extends Page
             $data["{{ title }}"] = "Modify the location";
             $data["{{ action }}"] = "save_location/".$this->_url[1];
             $data["{{ button }}"] = "Modify the location";
-            $content = View::makeHtml($data, "content_admin_create_location.html");
-            return ["Modify location", $content];
+            $view = new View($data, "content_admin_create_location.html");
+            return ["Modify location", $view->_html];
         }
     }
 

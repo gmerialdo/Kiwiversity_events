@@ -4,18 +4,19 @@ require_once "model/Model.php";
 require_once "view/View.php";
 require_once "conf.php";
 
-Model::init();
-
 //autoload for all controllers
 function my_autoloader($class) {
     require_once("controller/".$class.".php");
 }
 spl_autoload_register('my_autoloader');
 
-global $envProd, $uri_Start;
+//implement with db data
+$model = new Model("ocr-projet5-db", "root", "");
+
 $session = new Session();
 
 // show errors if not in envProd
+global $envProd;
 if (!$envProd){
     ini_set('display_startup_errors', 1);
     ini_set('display_errors', 1);
@@ -90,9 +91,6 @@ switch ($safeData->_url[0]){
         $page = new PageVisitor($safeData->_url);
         break;
 }
-
-
-
 
 // display page
 echo $page->getHtmlPage();

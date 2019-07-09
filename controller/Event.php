@@ -90,7 +90,8 @@ class Event
             "where" => [ "event_id = ".$this->_event_id],
             "limit" => 1
         ];
-        $data = Model::select($req);
+        global $model;
+        $data = $model->select($req);
         if ($data["succeed"]){
             $newKey;
             foreach ($data["data"][0] as $key => $value){
@@ -214,7 +215,8 @@ class Event
             "from" => "evt_tickets",
             "where" => [ "event_id = ".$this->_event_id, "cancelled_time IS NULL"]
         ];
-        $data = Model::select($req);
+        global $model;
+        $data = $model->select($req);
         if ($data["succeed"]){
             $booked_tickets = 0;
             if (isset($data["data"][0])){
@@ -244,7 +246,8 @@ class Event
             "where" => ["event_id = ".$this->_event_id],
             "limit" => 1
         ];
-        $update = Model::update($req, $data);
+        global $model;
+        $update = $model->update($req, $data);
         return $update["succeed"];
     }
 
@@ -253,7 +256,8 @@ class Event
             "table"  => "evt_events",
             "fields" => Event::FIELDS_TO_SET
         ];
-        $create = Model::insert($req, $data);
+        global $model;
+        $create = $model->insert($req, $data);
         $this->_event_id = $create["data"];
         return $create["succeed"];
     }
@@ -307,13 +311,14 @@ class Event
     }
 
     public function addOptionTickets($type, $name, $price, $sign, $price_booked){
-        return View::makeHtml([
+        $view = new View([
             "{{ type_ticket }}" => $type,
             "{{ name_ticket }}" => $name,
             "{{ price_ticket }}" => $price,
             "{{ dollar_sign }}" => $sign,
             "{{ price_booked }}" => $price_booked
         ],"elt_nb_tickets.html");
+        return $view->_html;
     }
 
 }

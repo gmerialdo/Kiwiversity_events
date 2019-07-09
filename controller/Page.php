@@ -30,67 +30,72 @@ class Page
 
     //to return the html for the page
     public function getHtmlPage(){
-        global $path, $session;
+        global $path, $session, $orga;
         //function getPage will return an array with $pageTitle and $content
         $getPage = $this->getPage();
-        $user_or_admin_style = "style_user.css";
+        $style = "style_user.css";
         if ($session->get('admin_mode')){
-            $user_or_admin_style = "style_admin.css";
+            $style = "style_admin.css";
         }
-        return view::makeHtml([
+        $navbar_view = new View($this->getNavbarData(), "navbar_template.html");
+        $footer_view = new View([
+            "{{ orga_name }}" => $orga["name"],
+            "{{ orga_logo_src }}" => $orga["logo_src"],
+            "{{ orga_website }}" => $orga["website"],
+            "{{ orga_address }}" => $orga["address"],
+            "{{ orga_city }}" => $orga["city"],
+            "{{ orga_state }}" =>$orga["state"],
+            "{{ orga_zipcode }}" => $orga["zipcode"],
+            "{{ orga_country }}" => $orga["country"],
+            "{{ orga_email }}" => $orga["email"],
+            "{{ orga_phone }}" => $orga["phone"]
+        ], "footer.html");
+        $view = new View([
             "{{ pageTitle }}" => $getPage[0],
-            "{{ user_or_admin_style }}" => $user_or_admin_style,
-            "{{ navBar }}" => $this->addNavbar(),
+            "{{ user_or_admin_style }}" => $style,
+            "{{ navBar }}" => $navbar_view->_html,
             "{{ content }}" => $getPage[1],
-            "{{ footer }}" => View::makeHtml([], "footer.html"),
-            "{{ orga_name }}" => "Alliance Française de Tucson",
-            "{{ orga_logo_src }}" => "layout/images/logo_AFTucson.png",
-            "{{ orga_website }}" => "www.aftucson.com",
-            "{{ orga_address }}" => "2099E. River Road",
-            "{{ orga_city }}" => "Tucson",
-            "{{ orga_state }}" => "AZ",
-            "{{ orga_zipcode }}" => "85718",
-            "{{ orga_country }}" => "USA",
-            "{{ orga_email }}" => "alliancefrancaisetucson@gmail.com",
-            "{{ orga_phone }}" => "+1 520-881-9158",
+            "{{ footer }}" => $footer_view->_html,
             "{{ path }}" => $path
         ], "page_template.html");
+        return $view->_html;
     }
 
-    //to add the nav bar
-    public function addNavbar(){
-        global $session;
+    //get all data for the navbar
+    public function getNavbarData(){
+        global $session, $orga;
         $navbar_account = "";
         $navbar_switch = "";
-        $navbar_link = View::makeHtml([], "navbar_user.html");
+        $navbar_link = file_get_contents("template/navbar_user.html");
         if ($this->_rights == "visitor"){
-            $navbar_accountoption = View::makeHtml([], "navbar_accountoption_signin.html");
-            $nav_bar_acc_opt_mob = View::makeHtml([], "navbar_accountoption_signin.html");
+            $navbar_acc_opt = file_get_contents("template/navbar_accountoption_signin.html");
+            $navbar_acc_opt_mob = file_get_contents("template/navbar_accountoption_signin.html");
         }
         else {
             $navbar_account = "- ".$session->get('first_name')." ". $session->get('last_name')." -";
             if ($session->get('admin_mode')){
-                $navbar_switch = View::makeHtml([], "navbar_switchtouser.html");
-                $navbar_link = View::makeHtml([], "navbar_admin.html");
-                $navbar_accountoption = View::makeHtml([], "navbar_accountoption_admin.html");
-                $nav_bar_acc_opt_mob = View::makeHtml([], "navbar_accountoption_admin_mobile.html");
+                $navbar_switch = file_get_contents("template/navbar_switchtouser.html");
+                $navbar_link = file_get_contents("template/navbar_admin.html");
+                $navbar_acc_opt = file_get_contents("template/navbar_accountoption_admin.html");
+                $navbar_acc_opt_mob = file_get_contents("template/navbar_accountoption_admin_mobile.html");
             }
             else {
                  // if user with admin rights
                 if ($this->_rights == "admin"){
-                    $navbar_switch = View::makeHtml([], "navbar_switchtoadmin.html");
+                    $navbar_switch = file_get_contents("template/navbar_switchtoadmin.html");
                 }
-                $navbar_accountoption = View::makeHtml([], "navbar_accountoption_logged.html");
-                $nav_bar_acc_opt_mob = View::makeHtml([], "navbar_accountoption_logged_mobile.html");
+                $navbar_acc_opt = file_get_contents("template/navbar_accountoption_logged.html");
+                $navbar_acc_opt_mob = file_get_contents("template/navbar_accountoption_logged_mobile.html");
             }
         }
-        return view::makeHtml([
+        return [
+            "{{ orga_name }}" => $orga["name"],
             "{{ navbar_account }}" => $navbar_account,
             "{{ navbar_switch }}" => $navbar_switch,
             "{{ navbar_link }}" => $navbar_link,
-            "{{ navbar_accountoption }}" => $navbar_accountoption,
-            "{{ navbar_accountoption_mobile }}" => $nav_bar_acc_opt_mob
-        ], "navbar_template.html");
+            "{{ navbar_accountoption }}" => $navbar_acc_opt,
+            "{{ navbar_accountoption_mobile }}" => $navbar_acc_opt_mob
+        ];
     }
 
     public function getPage(){
@@ -124,10 +129,11 @@ class Page
             else {
                 $may_be_event_id = "/".$event_id;
             }
-            $content = View::makeHtml(["{{ may_be_event_id }}" => $may_be_event_id], "content_login.html");
-            if ($message == "error") $content.= View::makeHtml([], "msg_login_error.html");
-            if ($message == "existing_email") $content.= View::makeHtml([], "msg_login_existing_email.html");
-            if ($message == "booking") $content.= View::makeHtml([], "msg_login_booking.html");
+            $view = new View(["{{ may_be_event_id }}" => $may_be_event_id], "content_login.html");
+            $content = $view->_html;
+            if ($message == "error") $content.= file_get_contents("template/msg_login_error.html");
+            if ($message == "existing_email") $content.= file_get_contents("template/msg_login_existing_email.html");
+            if ($message == "booking") $content.= file_get_contents("template/msg_login_booking.html");
         }
         return ["login", $content];
     }
@@ -195,9 +201,9 @@ class Page
                    $may_be_event_id = "/".$this->_url[1];
                 }
             }
-            $content = View::makeHtml(["{{ may_be_event_id }}" => $may_be_event_id, "{{ error_msg }}" => $msg], "content_create_account.html");
+            $view = new View(["{{ may_be_event_id }}" => $may_be_event_id, "{{ error_msg }}" => $msg], "content_create_account.html");
         }
-        return ["Create account", $content];
+        return ["Create account", $view->_html];
     }
 
     /*-------------------------------------------MANAGING SIGNIN-------------------------------------------------*/
@@ -273,7 +279,8 @@ class Page
                 "cancelled_time is NULL"
             ]
         ];
-        $data = Model::select($req);
+        global $model;
+        $data = $model->select($req);
         //return true if not empty or false otherwise
         return !empty($data["data"]);
     }
@@ -288,11 +295,11 @@ class Page
 
     public function display_error(){
         if (isset($this->_url[1])){
-            $content = View::makeHtml(["{{ link }}" => "{{ path }}/admin", "{{ link_txt }}" => "Go back to dashboard"], "content_display_error.html");
-            return ["Error", $content];
+            $view = new View(["{{ link }}" => "{{ path }}/admin", "{{ link_txt }}" => "Go back to dashboard"], "content_display_error.html");
+            return ["Error", $view->_html];
         }
-        $content = View::makeHtml(["{{ link }}" => "{{ path }}/see_all_events", "{{ link_txt }}" => "Go back to events"], "content_display_error.html");
-        return ["Error", $content];
+        $view = new View(["{{ link }}" => "{{ path }}/see_all_events", "{{ link_txt }}" => "Go back to events"], "content_display_error.html");
+        return ["Error", $view_html];
     }
 
 }

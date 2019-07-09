@@ -3,29 +3,31 @@
 class Model {
 
     //PDO instance
-    private static $_db;
+    private $_db;
 
-    public static function init(){
-        global $envProd, $my_db;
-        self::$_db = new PDO('mysql:host='.$my_db["host"].';dbname='.$my_db["database"].';charset=utf8', $my_db["user"], $my_db["password"]);
-        self::$_db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        if (!$envProd) self::$_db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-        unset($my_db);
+    public function __construct($base, $user, $password){
+        try {
+            $this->_db = new PDO('mysql:host=localhost;dbname='.$base.';charset=utf8', $user, $password);
+            $this->_db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE,PDO::FETCH_ASSOC);
+        }
+        catch(Exception $e){
+            die('Erreur : '.$e->getMessage());
+        }
     }
 
-    public static function request($sql, $data=NULL, $insert=false){
+    public function request($sql, $data=NULL, $insert=false){
         try {
             if ($data == NULL){
-                $result = self::$_db->query($sql);
+                $result = $this->_db->query($sql);
                 $data = $result->fetchAll();
             }
             else {
-                $result = self::$_db->prepare($sql);
+                $result = $this->_db->prepare($sql);
                 $result->execute($data);
                 //store result
             }
             if ($insert){
-                $data= self::$_db->lastInsertId();
+                $data= $this->_db->lastInsertId();
             }
             //close request
             $result->closeCursor();
@@ -47,7 +49,7 @@ class Model {
     }
 
     // build an sql SELECT query from args array
-    public static function select($args){
+    public function select($args){
         //add all fields to be selected
         $req = 'SELECT '.implode(", ", $args["fields"]);
         //add db table
@@ -59,21 +61,21 @@ class Model {
         if (isset($args["order"])) $req .= " ORDER BY ".$args["order"];
         if (isset($args["limit"])) $req .= " LIMIT ".$args["limit"];
         //launch query and return result
-        return self::request($req);
+        return $this->request($req);
     }
 
     // build an sql UPDATE query from args array
-    public static function update($args, $data){
+    public function update($args, $data){
         $req = 'UPDATE '.$args["table"];
         $req .= ' SET '.implode("=? , ", $args["fields"])."=?";
         $req .= ' WHERE '.implode(" AND ", $args["where"]);
         if (isset($args["limit"])) $req .= " LIMIT ".$args["limit"];
         //launch query and return result
-        return self::request($req, $data);
+        return $this->request($req, $data);
     }
 
     // build an sql INSERT query from args array
-    public static function insert($args, $data){
+    public function insert($args, $data){
         $req = 'INSERT INTO '.$args["table"];
         $req .= ' ('.implode(", ", $args["fields"]).")";
         $req .= ' VALUES ( ?';
@@ -84,15 +86,15 @@ class Model {
         }
         $req .= " )";
         //launch query and return result
-        return self::request($req, $data, true);
+        return $this->request($req, $data, true);
     }
 
     // build an sql DELETE query from args array
-    public static function delete($args){
+    public function delete($args){
         $req = 'DELETE FROM '.$args["from"];
         if (isset($args["where"])) $req .= ' WHERE ' .implode(" AND ", $args["where"]);
         //launch query and return result
-        return self::request($req);
+        return $this->request($req);
     }
 
 }

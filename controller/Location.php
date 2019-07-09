@@ -50,7 +50,8 @@ class Location {
             "where" => [ "location_id = ".$this->_location_id],
             "limit" => 1
         ];
-        $data = Model::select($req);
+        global $model;
+        $data = $model->select($req);
         if ($data["succeed"]){
             $newKey;
             foreach ($data["data"][0] as $key => $value){
@@ -87,7 +88,8 @@ class Location {
             "where" => ["location_id = ".$this->_location_id],
             "limit" => 1
         ];
-        $update = Model::update($req, $data);
+        global $model;
+        $update = $model->update($req, $data);
         return $update["succeed"];
     }
 
@@ -96,7 +98,8 @@ class Location {
             "table"  => "evt_locations",
             "fields" => ["name", "address", "city", "zipcode", "state", "country", "phone", "max_occupancy", "active"],
         ];
-        $insert = Model::insert($req, $data);
+        global $model;
+        $insert = $model->insert($req, $data);
         return $insert["succeed"];
     }
 

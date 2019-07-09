@@ -73,7 +73,8 @@ class Ticket
             "where" => [ "ticket_id = ".$this->_ticket_id],
             "limit" => 1
         ];
-        $data = Model::select($req);
+        global $model;
+        $data = $model->select($req);
         if ($data["succeed"]){
             $newKey;
             foreach ($data["data"][0] as $key => $value){
@@ -219,7 +220,8 @@ class Ticket
                 'total_to_pay'
             ]
         ];
-        $create = Model::insert($req, $data);
+        global $model;
+        $create = $model->insert($req, $data);
         return $create["succeed"];
     }
 
@@ -275,7 +277,8 @@ class Ticket
             "where" => ["ticket_id = ".$this->_ticket_id],
             "limit" => 1
         ];
-        $update = Model::update($req, $data);
+        global $model;
+        $update = $model->update($req, $data);
         return $update["succeed"];
     }
 
@@ -286,7 +289,8 @@ class Ticket
             "where" => ["ticket_id = ".$this->_ticket_id],
             "limit" => 1
         ];
-        $update = Model::update($req, $data);
+        global $model;
+        $update = $model->update($req, $data);
         return $update["succeed"];
     }
 

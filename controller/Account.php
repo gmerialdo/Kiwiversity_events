@@ -60,7 +60,8 @@ class Account
             "where" => [ "evt_account_id = ".$this->_evt_account_id],
             "limit" => 1
         ];
-        $data = Model::select($req);
+        global $model;
+        $data = $model->select($req);
         if ($data["succeed"]){
             $newKey;
             foreach ($data["data"][0] as $key => $value){
@@ -99,7 +100,8 @@ class Account
                     "active_account = 1"
                     ]
         ];
-        $data = Model::select($req);
+        global $model;
+        $data = $model->select($req);
         if (!empty($data["data"])){
             $this->_evt_account_id = $data["data"][0]["evt_account_id"];
         }
@@ -123,7 +125,8 @@ class Account
                 "from" => "evt_accounts",
                 "where" => ["email ='$this->_email'"]
         ];
-        $data = Model::select($req);
+        global $model;
+        $data = $model->select($req);
         //return true if not empty or false otherwise
         return empty($data["data"]);
     }
@@ -151,7 +154,8 @@ class Account
                 'active_account'
             ]
         ];
-        $create = Model::insert($req, $data);
+        global $model;
+        $create = $model->insert($req, $data);
         $this->_evt_account_id = $create["data"];
         if (!$admin){
             $this->setAccountDataFromDB();
@@ -173,7 +177,8 @@ class Account
             "where" => ["evt_account_id = ".$this->_evt_account_id],
             "limit" => 1
         ];
-        $update = Model::update($req, $data);
+        global $model;
+        $update = $model->update($req, $data);
         return $update["succeed"];
     }
 
