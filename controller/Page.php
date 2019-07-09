@@ -299,7 +299,7 @@ class Page
             return ["Error", $view->_html];
         }
         $view = new View(["{{ link }}" => "{{ path }}/see_all_events", "{{ link_txt }}" => "Go back to events"], "content_display_error.html");
-        return ["Error", $view_html];
+        return ["Error", $view->_html];
     }
 
 }
