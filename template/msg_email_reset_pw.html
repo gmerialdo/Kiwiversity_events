@@ -1,0 +1,12 @@
+<div class="container valign-wrapper"> 
+    <div class="row"> 
+        <h4>Hi {{ first_name }},</h4>
+        <p>We received a request to reset your password for your account: {{ email }}. We're here to help!</p>
+        <p>Simply click on the button to set a new password in the next 24 hours:</p>
+        <a class="btn waves-effect waves-light main_color" href="{{ path }}/reset_pw/{{ token }}">Set a New Password</a>
+        <p>If you didn't ask to change your password, don't worry! Your password is still safe and you can delete this email.</p>
+        <p>Cheers,</p>
+        <h3>{{ orga_name }}</h3>
+        <a class="btn waves-effect waves-light main_color" href="{{ path }}/{{ events_website }}" >>See our events</a>
+    </div>
+</div>

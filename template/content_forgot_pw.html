@@ -1,0 +1,25 @@
+<div class="container valign-wrapper"> 
+    <div class="row">
+        <form class="col s12 forgot_pw_form" method="post" action="{{ path }}/forgot_pw_sent">
+            <div class="col s12 main_color_dark_txt">
+                <br/><i class="large material-icons prefix">email</i>
+            </div>
+            <div class="input-field col l6 offset-l3 m8 offset-m2 s10 offset-s1">
+                <input placeholder="Enter your email" id="email" type="text" class="validate" name="email" required>
+                <label for="email">Email</label>
+            </div>
+            <div class="col s12 error_msg red-text">{{ error_msg }}</div>
+            <div class="col s12">
+                <br/>
+                <button class="btn waves-effect waves-light main_color" type="submit" name="submit">
+                    Reset password<i class="material-icons right">send</i>
+                </button>
+                <br/>
+                <br/>
+                <a href="{{ path }}/login" class="waves-effect waves-light btn main_color">
+                    Go back to sign in
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
