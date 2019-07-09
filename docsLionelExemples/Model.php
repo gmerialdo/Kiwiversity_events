@@ -80,7 +80,7 @@ class Model {
     }
     catch(Exception $e) {
       return [
-        "succeed" => FASLE,
+        "succeed" => FALSE,
         "data" => $e
       ];
     }

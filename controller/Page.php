@@ -114,27 +114,16 @@ class Page
     //to display the login page
     public function login($message="", $event_id=0){
         global $session;
-        if ($this->_rights == "logged_visitor" OR $this->_rights == "admin"){
-            if ($session->get('admin_mode')){
-                header('Location: admin');
-            }
-            else {
-                header('Location: logged/see_all_events');
-            }
+        if ($this->_rights != "visitor"){
+            header('Location: see_all_events');
         }
-        else {
-            if ($event_id == 0) {
-                $may_be_event_id = "";
-            }
-            else {
-                $may_be_event_id = "/".$event_id;
-            }
-            $view = new View(["{{ may_be_event_id }}" => $may_be_event_id], "content_login.html");
-            $content = $view->_html;
-            if ($message == "error") $content.= file_get_contents("template/msg_login_error.html");
-            if ($message == "existing_email") $content.= file_get_contents("template/msg_login_existing_email.html");
-            if ($message == "booking") $content.= file_get_contents("template/msg_login_booking.html");
-        }
+        if ($event_id == 0){$may_be_event_id = "";}
+        else {$may_be_event_id = "/".$event_id;}
+        $view = new View(["{{ may_be_event_id }}" => $may_be_event_id], "content_login.html");
+        $content = $view->_html;
+        if ($message == "error") $content.= file_get_contents("template/msg_login_error.html");
+        if ($message == "existing_email") $content.= file_get_contents("template/msg_login_existing_email.html");
+        if ($message == "booking") $content.= file_get_contents("template/msg_login_booking.html");
         return ["login", $content];
     }
 
@@ -187,32 +176,30 @@ class Page
         if ($this->_rights == "logged_visitor" OR $this->_rights == "admin"){
             header('Location: see_all_events');
         }
-        else {
-            $msg = "";
-            $may_be_event_id = "";
-            if (isset($this->_url[1])) {
-                if ($this->_url[1] == "error"){
-                    $msg = "An account already exists with this email. Please log in or click on 'Forgot password'.";
-                    if (isset($this->_url[2])) {
-                        $may_be_event_id = "/".$this->_url[2];
-                    }
-                }
-                else {
-                   $may_be_event_id = "/".$this->_url[1];
+        $msg = "";
+        $may_be_event_id = "";
+        if (isset($this->_url[1])) {
+            if ($this->_url[1] == "error"){
+                $msg = "An account already exists with this email. Please log in or click on 'Forgot password'.";
+                if (isset($this->_url[2])) {
+                    $may_be_event_id = "/".$this->_url[2];
                 }
             }
-            $view = new View(["{{ may_be_event_id }}" => $may_be_event_id, "{{ error_msg }}" => $msg], "content_create_account.html");
+            else {
+               $may_be_event_id = "/".$this->_url[1];
+            }
         }
+        $view = new View(["{{ may_be_event_id }}" => $may_be_event_id, "{{ error_msg }}" => $msg], "content_create_account.html");
         return ["Create account", $view->_html];
     }
 
     /*-------------------------------------------MANAGING SIGNIN-------------------------------------------------*/
 
-    //funcion that creates an account and logs into session if it worked
+    //function that creates an account and logs into session if it worked
     public function save_account(){
         global $session, $safeData;
         if (!$safeData->postEmpty()){
-            $email = $safeData->_post["new_email"];
+            $email = strtolower($safeData->_post["new_email"]);
             ?>
             <!--keep email in localStorage-->
             <script>
@@ -261,6 +248,77 @@ class Page
                     $this->alertRedirect($msg, $link);
                 }
             }
+        }
+        else {
+            header('Location: ');
+        }
+    }
+
+    /*-----------------------------------------MANAGING FORGOTTEN PASSWORD---------------------------------------------------*/
+
+    public function forgot_pw($msg = 0){
+        if ($this->_rights != "visitor"){
+            header('Location: ');
+        }
+        switch ($msg) {
+            case 1:
+                $error = "This email does not have an account. Please create an account to log in.";
+                break;
+            case 2:
+                $error = "Your account is inactive. Please contact the administrator.";
+                break;
+            default:
+                $error = "";
+                break;
+        }
+        $view = new View(["{{ error_msg }}" => $error], "content_forgot_pw.html");
+        return ["Forgotten password", $view->_html];
+    }
+
+    public function forgot_pw_sent(){
+        global $safeData;
+        if (!$safeData->postEmpty()){
+            $email = strtolower($safeData->_post["email"]);
+            $req = [
+                "fields" => ["*"],
+                "from" => "evt_accounts",
+                "where" => ["email = '$email'"]
+            ];
+            global $model;
+            $data = $model->select($req);
+            //if no matching email
+            if (!isset($data["data"][0])){
+                return $this->forgot_pw(1);
+            }
+            //if account is not active
+            if ($data["data"][0]["active_account"] == 0){
+                return $this->forgot_pw(2);
+            }
+            //create unique token starting with timestamp
+            $token = uniqid(time()."-");
+            global $orga;
+            // Define email parameters
+            $to = $email;
+            $subject = "Reset your password";
+            $first_name = ucfirst($data["data"][0]["first_name"]);
+            $first_name = htmlentities($first_name);
+            $msg_view = new View([
+                "{{ first_name }}" => $first_name,
+                "{{ email }}" => $email,
+                "{{ token }}" => $token,
+                "{{ orga_name }}" => $orga["name"],
+                "{{ events_website }}" => $orga["events_website"]
+            ], "msg_email_reset_pw.html");
+            $message = $msg_view->_html;
+            $headers='From: yourtestsender@yourtestdomain.com' . "\r\n";
+            $headers .= "MIME-Version: 1.0\r\n";
+            $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
+            // Send email
+            if (mail($to, $subject, $message, $headers)){
+                $view = new View(["{{ email }}" => $email], "content_forgot_pw_sent.html");
+                return ["Reset password", $view->_html];
+            }
+            header('Location: display_error');
         }
         else {
             header('Location: ');

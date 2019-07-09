@@ -8,12 +8,17 @@ class Model {
     public function __construct($base, $user, $password){
         try {
             $this->_db = new PDO('mysql:host=localhost;dbname='.$base.';charset=utf8', $user, $password);
-            $this->_db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE,PDO::FETCH_ASSOC);
+            global $envProd;
+            if (!$envProd){
+                $this->_db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+                $this->_db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            }
         }
         catch(Exception $e){
             die('Erreur : '.$e->getMessage());
         }
     }
+
 
     public function request($sql, $data=NULL, $insert=false){
         try {
@@ -24,7 +29,6 @@ class Model {
             else {
                 $result = $this->_db->prepare($sql);
                 $result->execute($data);
-                //store result
             }
             if ($insert){
                 $data= $this->_db->lastInsertId();
@@ -33,14 +37,12 @@ class Model {
             $result->closeCursor();
             //if no result
             if (empty($data)) $data="";
-
             return [
                 "succeed" => true,
                 "data"    => $data
             ];
         }
         catch(Exception $e) {
-            print_r($e);
             return [
                 "succeed" => false,
                 "data"    => $e
