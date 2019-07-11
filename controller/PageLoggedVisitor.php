@@ -93,9 +93,35 @@ class PageLoggedVisitor extends PageVisitor
                 }
                 $new_ticket = new Ticket("create", $data);
                 if ($new_ticket){
-                        $msg = "Your tickets are booked!";
-                        $link = "../logged/my_tickets";
-                        $this->alertRedirect($msg, $link);
+                    //notify user with popup
+                    $msg = "Your tickets are booked!";
+                    $link = "../logged/my_tickets";
+                    $this->alertRedirect($msg, $link);
+                    //send notification by email to admin
+                    global $model, $session;
+                    $req = [
+                        "fields" => ["*"],
+                        "from" => "evt_events",
+                        "where" => ["event_id = ".$data["event_id"]]
+                    ];
+                    $data = $model->select($req);
+                    $req2 = [
+                        "fields" => ["*"],
+                        "from" => "evt_accounts",
+                        "where" => ["evt_account_id = ".$session->get("evt_account_id")]
+                    ];
+                    $data2 = $model->select($req2);
+                    if (isset($data["data"][0]) AND isset($data2["data"][0])){
+                        $event_name = ucfirst($data["data"][0]["name"]);
+                        $event_name = htmlentities($event_name);
+                        $info = [
+                            "event_name" => $data["data"][0]["name"],
+                            "first_name" => $data2["data"][0]["first_name"],
+                            "last_name" => $data2["data"][0]["last_name"],
+                            "nb_tickets" => $nb_tickets_wanted
+                        ];
+                    }
+                    $notif = $this->sendNotifAdmin("tickets", $info);
                 }
                 else {
                     header('Location: ../display_error');

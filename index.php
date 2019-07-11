@@ -78,6 +78,9 @@ $safeData = new Security([
         "location_phone" => ['filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW],
         "max_occupancy" => FILTER_SANITIZE_NUMBER_INT
     ],
+    "get" => [
+        "token" => ['filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW]
+    ]
 ]);
 
 // decide if it's visitor mode or admin mode and create page

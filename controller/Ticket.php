@@ -173,16 +173,6 @@ class Ticket
             if (empty($args[$key])) $args["$key"] = NULL;
         }
         if (empty($args["donation"])) $args["donation"] = 0;
-        // if (empty($args["nb_tickets_adult_mb"])) $args["nb_tickets_adult_mb"] = NULL;
-        // if (empty($args["nb_tickets_adult"])) $args["nb_tickets_adult"] = NULL;
-        // if (empty($args["nb_tickets_child_mb"])) $args["nb_tickets_child_mb"] = NULL;
-        // if (empty($args["nb_tickets_child"])) $args["nb_tickets_child"] = NULL;
-        // if (empty($args["nb_tickets_all"])) $args["nb_tickets_all"] = NULL;
-        // if (empty($args["price_adult_mb_booked"])) $args["price_adult_mb_booked"] = NULL;
-        // if (empty($args["price_adult_booked"])) $args["price_adult_booked"] = NULL;
-        // if (empty($args["price_child_mb_booked"])) $args["price_child_mb_booked"] = NULL;
-        // if (empty($args["price_child_booked"])) $args["price_child_booked"] = NULL;
-        // if (empty($args["donation"])) $args["donation"] = 0;
         foreach ($args as $key => $value){
             $newKey = "_".$key;
             $this->$newKey = $value;

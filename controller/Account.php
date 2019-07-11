@@ -135,7 +135,7 @@ class Account
         $email = $args["email"];
         $data = [
             $email ,
-            hash("sha256", $args["password"]),
+            $args["hash"],
             $args["email"],
             ucfirst($args["first_name"]),
             ucfirst($args["last_name"]),

@@ -4,34 +4,42 @@ class Security
 {
 
     public $_post = [];
+    public $_get = [];
     public $_file = [];
     public $_url  = [];
 
     public function __construct($args) {
+        //get URL and securize
         global $uri_Start;
         $this->_url = filter_input(INPUT_SERVER, 'REQUEST_URI', FILTER_SANITIZE_URL);
         $this->_url = explode("/", $this->_url);
         $this->_url = array_slice($this->_url, $uri_Start);
+        //get all $_FILE if there is one
         if (array_key_exists("new_image_file", $_FILES)){
             $this->_file["new_image_file"] = $_FILES["new_image_file"];
         }
         else {$this->_file["new_image_file"] = null;}
+        //get all $_POST and securize
         if (isset($args["post"])){
           $this->_post = filter_input_array(INPUT_POST, $args["post"]);
         }
-        //sanitize all dates!!
+        //--sanitize all dates!!
         $all_dates = ["payment_datetime", "start_date", "finish_date"]; // add here every date input name!
         foreach ($all_dates as $value) {
             if (!empty($this->_post[$value])){
                 $this->_post[$value] = $this->sanitizeDate($this->_post[$value]);
             }
         }
-        //sanitize all times!!
+        //--sanitize all times!!
         $all_times = ["start_time", "finish_time"]; // add here every time input name!
         foreach ($all_times as $value) {
             if (!empty($this->_post[$value])){
                 $this->_post[$value] = $this->sanitizeTime($this->_post[$value]);
             }
+        }
+        //get all $_GET and securize
+        if (isset($args["get"])){
+          $this->_get = filter_input_array(INPUT_GET, $args["get"]);
         }
 
     }
@@ -58,6 +66,10 @@ class Security
 
     public function postEmpty(){
         return empty($this->_post);
+    }
+
+    public function getEmpty(){
+        return empty($this->_get);
     }
 
 }

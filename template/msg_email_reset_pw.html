@@ -1,12 +1,14 @@
 <div class="container valign-wrapper"> 
     <div class="row"> 
-        <h4>Hi {{ first_name }},</h4>
+        <h4 style="color: rgb(0, 96, 100);">Hi {{ first_name }},</h4>
         <p>We received a request to reset your password for your account: {{ email }}. We're here to help!</p>
-        <p>Simply click on the button to set a new password in the next 24 hours:</p>
-        <a class="btn waves-effect waves-light main_color" href="{{ path }}/reset_pw/{{ token }}">Set a New Password</a>
+        <p>Simply click on the button in the next 24 hours to set a new password:
+        <br/>
+        <br/>
+        <a style="color: rgb(0, 151, 167); font-weight: bold;" href="{{ path }}/reset_pw/?token={{ token }}">=>SET A NEW PASSWORD</a></p>
         <p>If you didn't ask to change your password, don't worry! Your password is still safe and you can delete this email.</p>
         <p>Cheers,</p>
-        <h3>{{ orga_name }}</h3>
-        <a class="btn waves-effect waves-light main_color" href="{{ path }}/{{ events_website }}" >>See our events</a>
+        <h3 style="color: rgb(0, 96, 100);">{{ orga_name }}</h3>
+        <a style="color: rgb(0, 151, 167); font-weight: bold; text-decoration: none;" href="{{ path }}/{{ events_website }}" >Click here to see our events</a>
     </div>
 </div>

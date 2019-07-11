@@ -1,0 +1,34 @@
+<div class="container valign-wrapper"> 
+    <div class="row">
+        <form class="col s12 login_form" method="post" action="{{ path }}/save_pw">
+            <div class="col s12 main_color_dark_txt">
+                <i class="large material-icons prefix">person</i>
+            </div>
+            <div class="col s12 main_color_dark_txt">
+                {{ first_name }} {{ last_name }}
+            </div>
+            <div class="col s12 main_color_dark_txt">
+                email: {{ email }}
+            </div>
+            <div class="col s12 main_color_dark_txt">
+                <br>Reset your password:
+            </div>
+            <div class="input-field col l4 offset-l4 m6 offset-m3 s10 offset-s1">
+                <input placeholder="Choose new password" id="new_password" type="password" class="validate" name="new_password" minlength="6" maxlength="20" oninput="setInterval(checkSecurityPW, 250)" required>
+                <label for="new_password">Password</label>
+                <div id="level_mdp" style="float:right;"></div>
+            </div>
+            <div class="input-field col l4 offset-l4 m6 offset-m3 s10 offset-s1">
+                <input placeholder="Confirm your password" id="new_password_check" type="password" oninput="verifyPw(this)" class="validate" name="new_password_check" required>
+                <label for="new_password_check">Confirm Password</label>
+                <div id="no_match" class="red-text" style="float:right;"></div>
+            </div>
+            <input type="hidden" name="evt_account_id" value="{{ evt_account_id }}"/>
+            <div class="col s12">
+                <button class="btn waves-effect waves-light main_color" type="submit" name="submit">
+                    Reset password<i class="material-icons right">send</i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

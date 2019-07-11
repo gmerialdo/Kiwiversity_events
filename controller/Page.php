@@ -211,7 +211,7 @@ class Page
             $data["email"] = $email;
             $data["first_name"] = $safeData->_post["new_first_name"];
             $data["last_name"] = $safeData->_post["new_last_name"];
-            $data["password"] = $safeData->_post["new_password"];
+            $data["hash"] = hash("sha256", $safeData->_post["new_password"]);
             if (empty($session->get('user_name'))){
                 $new_account = new Account("create", $data);
                 if ($new_account->getVarAccount("_valid") == false){
@@ -224,6 +224,7 @@ class Page
                     header('Location: ../signin');
                 }
                 else {
+                    //notify user with popup
                     $msg = "You successfully signed in!";
                     if (isset($this->_url[1])){
                         $link = "../logged/book_tickets/".$this->_url[1];
@@ -232,6 +233,8 @@ class Page
                         $link = "see_all_events";
                     }
                     $this->alertRedirect($msg, $link);
+                    //send notification by email to admin
+                    $notif = $this->sendNotifAdmin("account", $data);
                 }
             }
             elseif ($session->get('evt_managing_rights') == 1){
@@ -262,7 +265,7 @@ class Page
         }
         switch ($msg) {
             case 1:
-                $error = "This email does not have an account. Please create an account to log in.";
+                $error = "This email does not have an account. Please <a href='{{ path }}/signin'>create an account</a> to log in.";
                 break;
             case 2:
                 $error = "Your account is inactive. Please contact the administrator.";
@@ -271,7 +274,7 @@ class Page
                 $error = "";
                 break;
         }
-        $view = new View(["{{ error_msg }}" => $error], "content_forgot_pw.html");
+        $view = new View(["{{ error_msg }}" => $error, "{{ email }}" => ""], "content_forgot_pw.html");
         return ["Forgotten password", $view->_html];
     }
 
@@ -290,24 +293,30 @@ class Page
             if (!isset($data["data"][0])){
                 return $this->forgot_pw(1);
             }
+            $row = $data["data"][0];
             //if account is not active
-            if ($data["data"][0]["active_account"] == 0){
+            if ($row["active_account"] == 0){
                 return $this->forgot_pw(2);
             }
             //create unique token starting with timestamp
             $token = uniqid(time()."-");
-            global $orga;
+            $token_in_db = new Account("update", ["id" => $row["evt_account_id"], "token" => $token]);
+            if (!$token_in_db){
+                header('Location: display_error');
+            }
+            global $orga, $path;
             // Define email parameters
             $to = $email;
             $subject = "Reset your password";
-            $first_name = ucfirst($data["data"][0]["first_name"]);
+            $first_name = ucfirst($row["first_name"]);
             $first_name = htmlentities($first_name);
             $msg_view = new View([
                 "{{ first_name }}" => $first_name,
                 "{{ email }}" => $email,
                 "{{ token }}" => $token,
-                "{{ orga_name }}" => $orga["name"],
-                "{{ events_website }}" => $orga["events_website"]
+                "{{ orga_name }}" =>  htmlentities($orga["name"]),
+                "{{ events_website }}" => $orga["events_website"],
+                "{{ path }}" => $path
             ], "msg_email_reset_pw.html");
             $message = $msg_view->_html;
             $headers='From: yourtestsender@yourtestdomain.com' . "\r\n";
@@ -322,6 +331,64 @@ class Page
         }
         else {
             header('Location: ');
+        }
+    }
+
+    public function reset_pw(){
+        global $safeData;
+        if (!$safeData->getEmpty()){
+            $token = $safeData->_get["token"];
+            //check if token is in db
+            $req = [
+                "fields" => ["*"],
+                "from" => "evt_accounts",
+                "where" => ["token = '$token'"]
+            ];
+            global $model;
+            $data = $model->select($req);
+            if (!isset($data["data"][0])){
+                $error = "This password reset link is invalid.";
+                $view = new View(["{{ error_msg }}" => $error, "{{ email }}" => ""], "content_forgot_pw.html");
+                return ["Forgotten password", $view->_html];
+            }
+            $row = $data["data"][0];
+            $token = explode("-", $token);
+            //check if token < 24hours (86400s)
+            if (time()-$token[0] > 86400){
+                $error = "This password reset link has expired (24-hour validity).";
+                $view = new View(["{{ error_msg }}" => $error, "{{ email }}" => $row["email"]], "content_forgot_pw.html");
+                return ["Forgotten password", $view->_html];
+            }
+            $view = new View([
+                "{{ first_name }}" => $row["first_name"],
+                "{{ last_name }}" => $row["last_name"],
+                "{{ email }}" => $row["email"],
+                "{{ evt_account_id }}" => $row["evt_account_id"],
+            ], "content_reset_pw.html");
+            return ["Reset password", $view->_html];
+        }
+        else {
+            header('Location: ');
+        }
+    }
+
+    public function save_pw(){
+        global $safeData;
+        if (!$safeData->postEmpty()){
+            $new_pw = $safeData->_post["new_password"];
+            $update = new Account("update", ["id" => $safeData->_post["evt_account_id"], "password" => hash("sha256", $new_pw), "token" => null]);
+            if ($update){
+                $msg = "Your password has been reset. You can now log in.";
+                $link = "login";
+                $this->alertRedirect($msg, $link);
+            }
+            else {
+                header('Location: ../display_error');
+            }
+        }
+        else {
+            $view = new View(["{{ error_msg }}" => "", "{{ email }}" => ""], "content_forgot_pw.html");
+            return ["Forgotten password", $view->_html];
         }
     }
 
@@ -343,13 +410,44 @@ class Page
         return !empty($data["data"]);
     }
 
-    /*-------------------------------------------MANAGING JAVASCRIPT MESSAGES--------------------------------------*/
+    /*-------------------------------------------MANAGING NOTIFICATIONS TO ADMIN---------------------------------------------*/
+
+    public function sendNotifAdmin($type, $data){
+        global $orga, $path;
+        $to = $orga["admin_email"];
+        $subject = "ADMIN NOTIFICATION: new $type";
+        $data["first_name"] = ucfirst($data["first_name"]);
+        $data["first_name"] = htmlentities($data["first_name"]);
+        $data["last_name"] = ucfirst($data["last_name"]);
+        $data["last_name"] = htmlentities($data["last_name"]);
+        switch ($type) {
+            case 'account':
+                $template = "msg_email_notif_admin_account.html";
+                break;
+            case 'tickets':
+                $template = "msg_email_notif_admin_tickets.html";
+                break;
+        }
+        $elts;
+        foreach ($data as $key => $value) {
+            $elts["{{ $key }}"] = $value;
+        }
+        $elts["{{ events_website }}"] = $orga["events_website"];
+        $elts["{{ path }}"] = $path;
+        $msg_view = new View($elts, $template);
+        $headers='From: yourtestsender@yourtestdomain.com' . "\r\n";
+        $headers .= "MIME-Version: 1.0\r\n";
+        $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
+        return mail($to, $subject, $msg_view->_html, $headers);
+    }
+
+    /*-------------------------------------------MANAGING JAVASCRIPT MESSAGES------------------------------------------------*/
 
     public function alertRedirect($msg, $link){
         echo "<script> alert('$msg'); window.location.href='$link'; </script>";
     }
 
-    /*-------------------------------------------MANAGING ERRORS---------------------------------------------------*/
+    /*-------------------------------------------MANAGING ERRORS-------------------------------------------------------------*/
 
     public function display_error(){
         if (isset($this->_url[1])){
