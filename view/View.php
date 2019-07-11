@@ -5,7 +5,7 @@ class View
 
     public $_html;
 
-    function __construct($data, $template){
+    public function __construct($data, $template){
         $this->_html = "";
         if (isset($data[0])) $this->makeLoopHtml($data, $template);
         else $this->makeHtml($data, $template);

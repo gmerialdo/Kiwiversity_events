@@ -30,10 +30,6 @@ class Image {
         }
     }
 
-    public function getVarImage($_var){
-        return $this->$_var;
-    }
-
     public function setImageDataFromDB(){
         $req = [
             "fields" => [
@@ -52,6 +48,10 @@ class Image {
                 $this->$newKey = $value;
             }
         }
+    }
+
+    public function getVarImage($_var){
+        return $this->$_var;
     }
 
     public function updateImageInDB($fields, $data){
